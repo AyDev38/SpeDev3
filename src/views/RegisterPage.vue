@@ -19,10 +19,12 @@
   
   <script setup>
   import { ref } from 'vue';
-  import store from '../store/store';
   import { useRouter } from 'vue-router';
+  import { useAuthStore } from '../stores/authStore';
   
+  const authStore = useAuthStore();
   const router = useRouter();
+  
   const username = ref('');
   const password = ref('');
   const roles = ref({ manager: false, developer: false });
@@ -40,7 +42,7 @@
       return;
     }
   
-    const result = store.register(username.value, password.value, selectedRoles);
+    const result = authStore.register(username.value, password.value, selectedRoles);
     if (result.success) {
       success.value = true;
       message.value = result.message;

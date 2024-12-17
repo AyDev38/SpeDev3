@@ -1,68 +1,57 @@
 <template>
   <nav class="navbar">
-    <div class="nav-left">
+    <div>
       <router-link to="/">Accueil</router-link>
-      <router-link v-if="user" to="/projects">Projets</router-link>
+      <router-link v-if="authStore.currentUser" to="/projects">Projets</router-link>
     </div>
-    <div class="nav-right">
-      <!-- Affiche Login et Register si l'utilisateur n'est pas connecté -->
-      <router-link v-if="!user" to="/login">Login</router-link>
-      <router-link v-if="!user" to="/register">Register</router-link>
-      <!-- Affiche Déconnexion si l'utilisateur est connecté -->
-      <button v-if="user" @click="logout">Déconnexion</button>
+    <div>
+      <button v-if="authStore.currentUser" @click="logout">Déconnexion</button>
+      <template v-else>
+        <router-link to="/login">Login</router-link>
+        <router-link to="/register">Register</router-link>
+      </template>
     </div>
   </nav>
 </template>
 
 <script setup>
-import { watchEffect, ref } from 'vue';
-import store from '../../store/store';
+import { useAuthStore } from '@/stores/authStore';
 import { useRouter } from 'vue-router';
 
-// Router pour rediriger après déconnexion
+const authStore = useAuthStore();
 const router = useRouter();
 
-// Récupération de l'utilisateur actuel (réactif)
-const user = ref(null);
-
-// Surveille les changements de currentUser
-watchEffect(() => {
-  user.value = store.getCurrentUser().value;
-});
-
-// Déconnecte l'utilisateur
 function logout() {
-  store.logout();
-  router.push('/'); // Redirection vers l'accueil
+  authStore.logout();
+  router.push('/');
 }
 </script>
 
 <style scoped>
+/* Styles de la navbar */
 .navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #333;
-  color: white;
   padding: 10px 20px;
+  background: #333;
+  color: white;
 }
 
 a, button {
+  margin: 0 10px;
   color: white;
   text-decoration: none;
-  margin: 0 10px;
+}
+
+button {
   background: none;
   border: none;
   cursor: pointer;
   font-size: 1rem;
 }
 
-a:hover, button:hover {
+button:hover, a:hover {
   text-decoration: underline;
-}
-
-.nav-left, .nav-right {
-  display: flex;
-  align-items: center;
 }
 </style>

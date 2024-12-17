@@ -6,23 +6,24 @@
         <input v-model="password" type="password" placeholder="Mot de passe" required />
         <button type="submit">Se connecter</button>
       </form>
-      <p>Pas de compte ? <router-link to="/register">S'enregistrer</router-link></p>
       <p v-if="error" class="error">{{ error }}</p>
     </div>
   </template>
   
   <script setup>
   import { ref } from 'vue';
-  import store from '../store/store';
   import { useRouter } from 'vue-router';
+  import { useAuthStore } from '../stores/authStore';
+  
+  const authStore = useAuthStore();
+  const router = useRouter();
   
   const username = ref('');
   const password = ref('');
   const error = ref('');
-  const router = useRouter();
   
   function login() {
-    if (store.authenticate(username.value, password.value)) {
+    if (authStore.authenticate(username.value, password.value)) {
       router.push('/projects');
     } else {
       error.value = 'Identifiants incorrects.';
