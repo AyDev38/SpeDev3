@@ -1,26 +1,27 @@
-<!-- src\views\ProjectDetailPage.vue -->
 <template>
-    <div v-if="project">
-      <h1>{{ project.name }}</h1>
+    <div v-if="project" class="project-detail-container">
+      <!-- Titre du projet -->
+      <header class="project-header">
+        <h1>{{ project.name }}</h1>
+      </header>
   
-      <!-- Section Assignation Manager -->
-      <div class="manager-section">
-        <h3>Managers assignés :</h3>
-        <ul>
-          <li v-for="managerId in project.assignedManagers" :key="managerId">
+      <!-- Section Managers -->
+      <div class="manager-section card">
+        <h3>Managers assignés</h3>
+        <div class="manager-tags">
+          <span v-for="managerId in project.assignedManagers" :key="managerId" class="tag">
             {{ getUserLogin(managerId) }}
-          </li>
-        </ul>
-        <button v-if="isManager && !isAssigned" @click="assignManager">
+          </span>
+        </div>
+        <button v-if="isManager && !isAssigned" @click="assignManager" class="btn-primary">
           M'assigner à ce projet
         </button>
-        <span v-if="isAssigned">Vous êtes assigné à ce projet.</span>
       </div>
   
-      <!-- Section Création de tâches -->
-      <div class="task-creation-section" v-if="isManager && isAssigned">
+      <!-- Création de Tâches -->
+      <div v-if="isManager && isAssigned" class="task-creation card">
         <h3>Créer une tâche</h3>
-        <form @submit.prevent="createTask">
+        <form @submit.prevent="createTask" class="form-inline">
           <input v-model="taskName" placeholder="Nom de la tâche" required />
           <select v-model="selectedDeveloperId" required>
             <option value="" disabled>Choisir un développeur</option>
@@ -28,74 +29,58 @@
               {{ dev.username }}
             </option>
           </select>
-          <button type="submit">Créer la tâche</button>
+          <button type="submit" class="btn-primary">Créer</button>
         </form>
       </div>
   
-      <!-- Section Tâches -->
-      <div class="task-section">
-        <h3>Liste des tâches</h3>
-        <ul>
-          <li v-for="task in project.tasks" :key="task.id">
-            {{ task.name }} - Statut :
-            <span>
-              <select
-                v-model="task.status"
-                @change="updateTaskStatus(task.id, task.status)"
-                v-if="isManager || task.assignedTo === userId"
-              >
-                <option value="Non validé">Non validé</option>
-                <option value="En cours">En cours</option>
-                <option value="Terminé">Terminé</option>
-              </select>
-              <span v-else>{{ task.status }}</span>
-            </span>
-  
-            <!-- Liste déroulante pour changer le développeur (Manager uniquement) -->
-            <div v-if="isManager">
-              <label>Développeur assigné :</label>
-              <select
-                v-model="task.assignedTo"
-                @change="updateTaskDeveloper(task.id, task.assignedTo)"
-              >
-                <option value="" disabled>Choisir un développeur</option>
-                <option v-for="dev in developers" :key="dev.id" :value="dev.id">
-                  {{ dev.username }}
-                </option>
-              </select>
-            </div>
-          </li>
-        </ul>
-        <p v-if="project.tasks.length === 0">Aucune tâche dans ce projet.</p>
+      <!-- Kanban Board -->
+      <div class="kanban-board">
+        <div
+          class="kanban-column"
+          v-for="status in taskStatuses"
+          :key="status"
+          @dragover.prevent
+          @drop="onDrop(status)"
+        >
+          <h3>{{ status }}</h3>
+          <div
+            class="task-card"
+            v-for="task in getTasksByStatus(status)"
+            :key="task.id"
+            draggable="true"
+            @dragstart="onDragStart(task.id)"
+          >
+            <p class="task-name">{{ task.name }}</p>
+            <p class="task-details">Assigné à : {{ getUserLogin(task.assignedTo) }}</p>
+          </div>
+        </div>
       </div>
   
-      <!-- Retour -->
-      <router-link to="/projects">Retour aux projets</router-link>
-    </div>
-    <div v-else>
-      <p>Chargement en cours...</p>
+      <router-link to="/projects" class="back-link">Retour aux projets</router-link>
     </div>
   </template>
   
   <script setup>
-  import { ref, computed, onMounted } from 'vue';
-  import { useRoute } from 'vue-router';
-  import { useProjectStore } from '@/stores/projectStore';
-  import { useAuthStore } from '@/stores/authStore';
+  import { ref, computed, onMounted } from "vue";
+  import { useRoute } from "vue-router";
+  import { useProjectStore } from "@/stores/projectStore";
+  import { useAuthStore } from "@/stores/authStore";
   
   const route = useRoute();
   const projectStore = useProjectStore();
   const authStore = useAuthStore();
   
   const project = ref(null);
-  const taskName = ref('');
-  const selectedDeveloperId = ref('');
   const developers = ref([]);
+  const taskName = ref("");
+  const selectedDeveloperId = ref("");
+  const draggedTaskId = ref(null);
   
+  const taskStatuses = ["Non validé", "En cours", "Terminé"];
   const userId = computed(() => authStore.currentUser?.id);
   const roles = computed(() => authStore.currentUser?.roles);
-  const isManager = computed(() => roles.value?.includes('manager'));
-  const isAssigned = computed(() => project.value?.assignedManagers?.includes(userId.value));
+  const isManager = computed(() => roles.value?.includes("manager"));
+  const isAssigned = computed(() => project.value?.assignedManagers.includes(userId.value));
   
   onMounted(() => {
     const projectId = Number(route.params.id);
@@ -103,62 +88,150 @@
     developers.value = authStore.getDevelopers();
   });
   
-  function getUserLogin(userId) {
-    const user = authStore.getUserById(userId);
-    return user ? user.username : 'Utilisateur inconnu';
+  const getTasksByStatus = (status) => {
+    return project.value?.tasks.filter((task) => task.status === status) || [];
+  };
+  
+  function onDragStart(taskId) {
+    draggedTaskId.value = taskId;
+  }
+  
+  function onDrop(newStatus) {
+    if (draggedTaskId.value) {
+      projectStore.updateTaskStatus(project.value.id, draggedTaskId.value, newStatus);
+      reloadProject();
+      draggedTaskId.value = null;
+    }
   }
   
   function assignManager() {
     projectStore.assignManagerToProject(project.value.id, userId.value);
-    project.value = projectStore.getProjectById(project.value.id);
+    reloadProject();
   }
   
   function createTask() {
     if (taskName.value && selectedDeveloperId.value) {
       projectStore.addTaskToProject(project.value.id, taskName.value, selectedDeveloperId.value);
-      taskName.value = '';
-      selectedDeveloperId.value = '';
-      project.value = projectStore.getProjectById(project.value.id);
+      taskName.value = "";
+      selectedDeveloperId.value = "";
+      reloadProject();
     }
   }
   
-  function updateTaskStatus(taskId, newStatus) {
-    projectStore.updateTaskStatus(project.value.id, taskId, newStatus);
+  function reloadProject() {
     project.value = projectStore.getProjectById(project.value.id);
   }
   
-  function updateTaskDeveloper(taskId, newDeveloperId) {
-    projectStore.updateTaskDeveloper(project.value.id, taskId, newDeveloperId);
-    project.value = projectStore.getProjectById(project.value.id);
+  function getUserLogin(id) {
+    const user = authStore.getUserById(id);
+    return user ? user.username : "Utilisateur inconnu";
   }
   </script>
   
   <style scoped>
-  .manager-section,
-  .task-section,
-  .task-creation-section {
-    margin: 20px 0;
+  .project-detail-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    font-family: Arial, sans-serif;
   }
   
-  button,
-  select,
-  input {
-    margin: 5px;
+  .project-header h1 {
+    text-align: center;
+    color: #007bff;
+  }
+  
+  .card {
+    background: white;
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .manager-tags .tag {
+    display: inline-block;
+    background: #007bff;
+    color: white;
     padding: 5px 10px;
+    border-radius: 15px;
+    margin-right: 10px;
+  }
+  
+  .kanban-board {
+    display: flex;
+    gap: 15px;
+  }
+  
+  .kanban-column {
+    flex: 1;
+    background: #f8f8f8;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .kanban-column h3 {
+    text-align: center;
+    color: #555;
+  }
+  
+  .task-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    cursor: move;
+  }
+  
+  .task-name {
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .task-details {
+    font-size: 0.9em;
+    color: #666;
+  }
+  
+  .task-creation form {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .form-inline input,
+  .form-inline select,
+  .form-inline button {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+  
+  .btn-primary {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
     cursor: pointer;
   }
   
-  ul {
-    list-style: none;
-    padding: 0;
+  .btn-primary:hover {
+    background-color: #0056b3;
   }
   
-  li {
-    margin: 10px 0;
+  .back-link {
+    display: block;
+    margin-top: 20px;
+    text-align: center;
+    color: #007bff;
+    text-decoration: none;
   }
   
-  label {
-    margin-right: 5px;
+  .back-link:hover {
+    text-decoration: underline;
   }
   </style>
   
