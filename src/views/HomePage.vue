@@ -1,3 +1,4 @@
+<!-- src\views\HomePage.vue -->
 <template>
     <div class="home-page">
       <h1>Bienvenue sur le Projet XYZ</h1>

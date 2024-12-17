@@ -1,69 +1,49 @@
 <template>
-  <div class="project-page">
-    <h1>Liste des Projets</h1>
-    <div v-if="isManager" class="add-project-form">
-      <h2>Ajouter un projet</h2>
-      <form @submit.prevent="addProject">
-        <input v-model="newProjectName" type="text" placeholder="Nom du projet" required />
+  <div>
+    <h1>Gestion des Projets</h1>
+    <!-- Ajouter un projet -->
+    <div v-if="isManager">
+      <h3>Créer un projet</h3>
+      <form @submit.prevent="createProject">
+        <input v-model="newProjectName" placeholder="Nom du projet" required />
         <button type="submit">Créer</button>
       </form>
     </div>
 
-    <ul v-if="projects.length > 0" class="project-list">
-      <li v-for="project in projects" :key="project.id" class="project-item">
-        <span>{{ project.name }}</span>
-        <div v-if="isManager" class="actions">
-          <button @click="editProject(project.id)">Modifier</button>
-          <button @click="deleteProject(project.id)">Supprimer</button>
-        </div>
+    <!-- Liste des projets -->
+    <ul>
+      <li v-for="project in projects" :key="project.id">
+        {{ project.name }}
+        <button @click="editProject(project.id)">Modifier</button>
+        <button @click="deleteProject(project.id)">Supprimer</button>
       </li>
     </ul>
-    <p v-else>Aucun projet disponible.</p>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import { useProjectStore } from '../stores/projectStore';
-import { useAuthStore } from '../stores/authStore';
+import { ref, computed } from 'vue';
+import { useProjectStore } from '@/stores/projectStore';
+import { useAuthStore } from '@/stores/authStore';
 
 const projectStore = useProjectStore();
 const authStore = useAuthStore();
 
-const user = computed(() => authStore.getCurrentUser());
-const isManager = computed(() => user.value?.roles?.includes('manager') ?? false);
-
-const projects = ref([]);
+const projects = computed(() => projectStore.getProjects());
+const isManager = computed(() => authStore.currentUser?.roles.includes('manager'));
 const newProjectName = ref('');
 
-onMounted(() => {
-  projects.value = projectStore.getProjects();
-});
-
-function addProject() {
-  projectStore.addProject(newProjectName.value);
+function createProject() {
+  projectStore.addProject(newProjectName.value, authStore.currentUser.id);
   newProjectName.value = '';
-  projects.value = projectStore.getProjects();
 }
 
-function editProject(projectId) {
+function editProject(id) {
   const newName = prompt('Nouveau nom du projet');
-  if (newName) {
-    projectStore.updateProject(projectId, newName);
-    projects.value = projectStore.getProjects();
-  }
+  if (newName) projectStore.updateProject(id, newName);
 }
 
-function deleteProject(projectId) {
-  if (confirm('Voulez-vous vraiment supprimer ce projet ?')) {
-    projectStore.deleteProject(projectId);
-    projects.value = projectStore.getProjects();
-  }
+function deleteProject(id) {
+  if (confirm('Confirmez-vous la suppression ?')) projectStore.deleteProject(id);
 }
 </script>
-
-<style scoped>
-.project-page {
-  padding: 20px;
-}
-</style>

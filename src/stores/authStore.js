@@ -1,9 +1,10 @@
+// src\stores\authStore.js
 import { defineStore } from 'pinia';
 
 export const useAuthStore = defineStore('authStore', {
   state: () => ({
     users: JSON.parse(localStorage.getItem('users')) || [],
-    currentUser: null,
+    currentUser: JSON.parse(localStorage.getItem('currentUser')) || null,
   }),
 
   actions: {
@@ -20,7 +21,7 @@ export const useAuthStore = defineStore('authStore', {
       const user = this.users.find((u) => u.username === username && u.password === password);
       if (user) {
         this.currentUser = user;
-        this.saveUsers();
+        localStorage.setItem('currentUser', JSON.stringify(user));
         return true;
       }
       return false;
@@ -28,7 +29,7 @@ export const useAuthStore = defineStore('authStore', {
 
     logout() {
       this.currentUser = null;
-      this.saveUsers();
+      localStorage.removeItem('currentUser');
     },
 
     saveUsers() {

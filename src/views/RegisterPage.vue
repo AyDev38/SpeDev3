@@ -1,3 +1,4 @@
+<!-- src\views\RegisterPage.vue -->
 <template>
     <div class="auth-page">
       <h2>Inscription</h2>
@@ -53,8 +54,9 @@
     }
   }
   </script>
-  
-  <style scoped>
-  @import "../styles/auth.css";
-  </style>
-  
+    
+
+    <style scoped>
+    @import "../styles/auth.css";
+    </style>
+    

@@ -1,3 +1,4 @@
+<!-- src\views\LoginPage.vue -->
 <template>
     <div class="auth-page">
       <h2>Connexion</h2>

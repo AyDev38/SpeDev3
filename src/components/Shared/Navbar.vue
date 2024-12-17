@@ -1,3 +1,4 @@
+<!-- src\components\Shared\Navbar.vue -->
 <template>
   <nav class="navbar">
     <div>

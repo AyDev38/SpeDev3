@@ -1,3 +1,4 @@
+// src\stores\projectStore.js
 import { defineStore } from 'pinia';
 
 export const useProjectStore = defineStore('projectStore', {
@@ -10,8 +11,8 @@ export const useProjectStore = defineStore('projectStore', {
       return this.projects;
     },
 
-    addProject(name) {
-      this.projects.push({ id: Date.now(), name, tasks: [] });
+    addProject(name, managerId) {
+      this.projects.push({ id: Date.now(), name, managerId, tasks: [] });
       this.saveProjects();
     },
 
