@@ -1,0 +1,54 @@
+.auth-page {
+    padding: 20px;
+    max-width: 400px;
+    margin: 0 auto;
+    font-family: Arial, sans-serif;
+  }
+  
+  .auth-page h2 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .auth-page form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .auth-page input, .auth-page button {
+    display: block;
+    padding: 10px;
+    font-size: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .auth-page button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .auth-page button:hover {
+    background-color: #0056b3;
+  }
+  
+  .auth-page .error {
+    color: red;
+    font-size: 0.9rem;
+  }
+  
+  .auth-page .success {
+    color: green;
+    font-size: 0.9rem;
+  }
+  
+  .auth-page p {
+    text-align: center;
+    font-size: 0.9rem;
+  }
+  
