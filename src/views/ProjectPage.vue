@@ -1,28 +1,30 @@
 <template>
-  <div>
+  <div class="project-container">
     <h1>Gestion des Projets</h1>
 
-    <!-- Ajouter un projet (Manager uniquement) -->
-    <div v-if="isManager">
+    <!-- Section Ajouter un projet (Manager uniquement) -->
+    <div v-if="isManager" class="add-project-section">
       <h3>Créer un projet</h3>
-      <form @submit.prevent="createProject">
+      <form @submit.prevent="createProject" class="add-project-form">
         <input v-model="newProjectName" placeholder="Nom du projet" required />
         <button type="submit">Créer</button>
       </form>
     </div>
 
-    <!-- Liste des projets -->
-    <ul>
-      <li v-for="project in projects" :key="project.id">
-        <!-- Nom du projet cliquable -->
-        <router-link :to="`/projects/${project.id}`">{{ project.name }}</router-link>
-        <!-- Actions Modifier et Supprimer -->
-        <template v-if="isManager">
-          <button @click="editProject(project.id)">Modifier</button>
-          <button @click="deleteProject(project.id)">Supprimer</button>
-        </template>
-      </li>
-    </ul>
+    <!-- Liste des projets sous forme de cartes -->
+    <div class="project-grid">
+      <div v-for="project in projects" :key="project.id" class="project-card">
+        <router-link :to="`/projects/${project.id}`" class="project-title">
+          {{ project.name }}
+        </router-link>
+
+        <!-- Actions (Manager uniquement) -->
+        <div v-if="isManager" class="project-actions">
+          <button class="edit-btn" @click="editProject(project.id)">Modifier</button>
+          <button class="delete-btn" @click="deleteProject(project.id)">Supprimer</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -78,6 +80,7 @@ function editProject(id) {
   }
 }
 
+// Supprimer un projet
 function deleteProject(id) {
   if (confirm('Confirmez-vous la suppression ?')) {
     projectStore.deleteProject(id, roles.value);
@@ -87,27 +90,105 @@ function deleteProject(id) {
 </script>
 
 <style scoped>
-ul {
-  list-style: none;
-  padding: 0;
+.project-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
 }
 
-li {
-  margin: 10px 0;
-  display: flex;
-  align-items: center;
+h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
 }
 
-a {
-  text-decoration: none;
-  color: #007bff;
-  font-size: 1.2rem;
+.add-project-section {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.add-project-form input {
+  padding: 8px;
   margin-right: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.add-project-form button {
+  padding: 8px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.add-project-form button:hover {
+  background-color: #0056b3;
+}
+
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.project-card {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: box-shadow 0.3s ease;
+}
+
+.project-card:hover {
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+.project-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #007bff;
+  text-decoration: none;
+  margin-bottom: 10px;
+}
+
+.project-title:hover {
+  text-decoration: underline;
+}
+
+.project-actions {
+  display: flex;
+  justify-content: space-between;
 }
 
 button {
-  margin-left: 10px;
   padding: 5px 10px;
   cursor: pointer;
+  border: none;
+  border-radius: 5px;
+}
+
+.edit-btn {
+  background-color: #ffc107;
+  color: white;
+}
+
+.edit-btn:hover {
+  background-color: #e0a800;
+}
+
+.delete-btn {
+  background-color: #dc3545;
+  color: white;
+}
+
+.delete-btn:hover {
+  background-color: #c82333;
 }
 </style>
