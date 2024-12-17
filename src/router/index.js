@@ -7,12 +7,14 @@ import LoginPage from '../views/LoginPage.vue';
 import RegisterPage from '../views/RegisterPage.vue';
 import ProjectPage from '../views/ProjectPage.vue';
 import NotFoundPage from '../views/NotFoundPage.vue';
+import ProjectDetailPage from '@/views/ProjectDetailPage.vue';
 
 const routes = [
   { path: '/', component: HomePage, meta: { requiresGuest: true } },
   { path: '/login', component: LoginPage, meta: { requiresGuest: true } },
   { path: '/register', component: RegisterPage, meta: { requiresGuest: true } },
   { path: '/projects', component: ProjectPage, meta: { requiresAuth: true } },
+  { path: '/projects/:id', component: ProjectDetailPage, meta: { requiresAuth: true } },
   { path: '/:pathMatch(.*)*', component: NotFoundPage },
 ];
 
