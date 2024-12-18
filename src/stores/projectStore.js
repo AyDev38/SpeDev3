@@ -68,12 +68,16 @@ export const useProjectStore = defineStore('projectStore', {
     addTaskToProject(projectId, taskName, developerId) {
       const project = this.getProjectById(projectId);
       if (project) {
+        // Vérifie si le manager est toujours assigné
+        if (!project.assignedManagers.includes(developerId)) {
+          throw new Error("Vous ne pouvez pas ajouter de tâche à ce projet.");
+        }
         project.tasks.push({
           id: Date.now(),
           name: taskName,
           assignedTo: developerId,
           status: 'Non validé',
-          comments: [], // Initialisation des commentaires
+          comments: [],
         });
         this.saveProjects();
       }
@@ -175,6 +179,16 @@ export const useProjectStore = defineStore('projectStore', {
         }
       }
     },
+
+    // Retirer un manager d'un projet
+    removeManagerFromProject(projectId, managerId) {
+      const project = this.getProjectById(projectId);
+      if (project) {
+        project.assignedManagers = project.assignedManagers.filter((id) => id !== managerId);
+        this.saveProjects();
+      }
+    },
+
 
   },
 });

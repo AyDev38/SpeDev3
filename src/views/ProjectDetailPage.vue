@@ -14,13 +14,17 @@
             {{ getUserLogin(managerId) }}
           </span>
         </div>
+        <button v-if="isManager && isAssigned" @click="removeManager" class="btn-danger">
+          Me retirer de ce projet
+        </button>
         <button v-if="isManager && !isAssigned" @click="assignManager" class="btn-primary">
           M'assigner à ce projet
         </button>
       </div>
+
   
       <!-- Création de Tâches -->
-      <div class="task-creation card">
+      <div v-if="isManager && isAssigned" class="task-creation card">
         <h3>Créer une tâche</h3>
         <form @submit.prevent="createTask" class="form-inline">
           <input v-model="taskName" placeholder="Nom de la tâche" required />
@@ -236,6 +240,13 @@
   function deleteComment(taskId, commentId) {
     if (confirm("Voulez-vous vraiment supprimer ce commentaire ?")) {
       projectStore.deleteComment(project.value.id, taskId, commentId, userId.value);
+      reloadProject();
+    }
+  }
+
+  function removeManager() {
+    if (confirm("Voulez-vous vraiment vous retirer de ce projet ?")) {
+      projectStore.removeManagerFromProject(project.value.id, userId.value);
       reloadProject();
     }
   }
@@ -505,6 +516,21 @@
 .btn-delete-task:hover {
   background-color: #c82333;
 }
+
+
+.btn-danger {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
+}
+
 
 
   </style>
