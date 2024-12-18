@@ -55,6 +55,30 @@ export const useProjectStore = defineStore('projectStore', {
       this.saveProjects();
     },
 
+    getProjectStats(projectId) {
+      const project = this.getProjectById(projectId);
+      if (project) {
+        const totalTasks = project.tasks.length;
+        const nonValidated = project.tasks.filter(task => task.status === "Non validé").length;
+        const inProgress = project.tasks.filter(task => task.status === "En cours").length;
+        const completed = project.tasks.filter(task => task.status === "Terminé").length;
+    
+        return { totalTasks, nonValidated, inProgress, completed };
+      }
+      return { totalTasks: 0, nonValidated: 0, inProgress: 0, completed: 0 };
+    },
+
+    getDeadlineColor(deadline) {
+      const now = new Date();
+      const diff = (new Date(deadline) - now) / (1000 * 60 * 60 * 24); // Différence en jours
+    
+      if (diff > 30) return "text-success"; // Vert
+      if (diff > 7) return "text-warning"; // Jaune
+      if (diff > 1) return "text-orange"; // Orange
+      return diff >= 0 ? "text-danger" : "bg-danger text-white"; // Rouge si dépassé
+    },
+    
+
     // Assigner un manager à un projet
     assignManagerToProject(projectId, managerId) {
       const project = this.getProjectById(projectId);

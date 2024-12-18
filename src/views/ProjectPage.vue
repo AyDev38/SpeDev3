@@ -1,4 +1,3 @@
-<!-- src\views\ProjectPage.vue -->
 <template>
   <div class="container my-5">
     <h1 class="text-center">Gestion des Projets</h1>
@@ -35,8 +34,25 @@
       >
         <div class="card h-100">
           <div class="card-body">
+            <!-- Titre du projet -->
             <h5 class="card-title">{{ project.name }}</h5>
-            <p class="card-text">Échéance : {{ project.deadline || 'Non spécifiée' }}</p>
+            
+            <!-- Date limite avec couleur -->
+            <p class="card-text">
+              Échéance : 
+              <span :class="getDeadlineColor(project.deadline)">
+                {{ formatDeadline(project.deadline) }}
+              </span>
+            </p>
+
+            <!-- Statistiques des tâches -->
+            <p class="card-text">
+              <strong>Tâches :</strong>
+              Total : {{ getProjectStats(project.id).totalTasks }},
+              Non validées : {{ getProjectStats(project.id).nonValidated }},
+              En cours : {{ getProjectStats(project.id).inProgress }},
+              Terminées : {{ getProjectStats(project.id).completed }}
+            </p>
           </div>
           <div class="card-footer d-flex justify-content-between">
             <router-link :to="`/projects/${project.id}`" class="btn btn-link">Détails</router-link>
@@ -60,7 +76,6 @@
     </div>
   </div>
 </template>
-
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
@@ -123,5 +138,43 @@ function deleteProject(id) {
     loadProjects();
   }
 }
+
+// Obtenir les statistiques d'un projet
+const getProjectStats = (projectId) => projectStore.getProjectStats(projectId);
+
+// Déterminer la couleur de l'échéance
+const getDeadlineColor = (deadline) => projectStore.getDeadlineColor(deadline);
+
+// Formater l'affichage de l'échéance
+const formatDeadline = (deadline) => {
+  if (!deadline) return "Non spécifiée";
+  const diff = (new Date(deadline) - new Date()) / (1000 * 60 * 60 * 24);
+  if (diff < 0) return `Délai dépassé (${Math.abs(Math.floor(diff))}j)`;
+  return `${Math.ceil(diff)} jours restants`;
+};
 </script>
 
+<style scoped>
+.text-success {
+  color: green;
+}
+
+.text-warning {
+  color: orange;
+}
+
+.text-orange {
+  color: darkorange;
+}
+
+.text-danger {
+  color: red;
+}
+
+.bg-danger {
+  background-color: red;
+  color: white;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+</style>
