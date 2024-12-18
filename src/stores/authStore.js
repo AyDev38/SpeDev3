@@ -1,5 +1,6 @@
 // src/stores/authStore.js
 import { defineStore } from 'pinia';
+import bcrypt from 'bcryptjs';
 
 export const useAuthStore = defineStore('authStore', {
   state: () => ({
@@ -16,39 +17,44 @@ export const useAuthStore = defineStore('authStore', {
       return this.users.find((user) => user.id === userId);
     },
 
-    register(username, password, roles) {
+    async register(username, password, roles) {
       const existingUser = this.users.find((u) => u.username === username);
       if (existingUser) return { success: false, message: "Nom d'utilisateur déjà pris." };
 
-      const newUser = { id: Date.now(), username, password, roles };
+      // Hasher le mot de passe
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      const newUser = { id: Date.now(), username, password: hashedPassword, roles };
       this.users.push(newUser);
       localStorage.setItem('users', JSON.stringify(this.users));
       return { success: true, message: 'Inscription réussie !' };
     },
 
-    authenticate(username, password) {
-      const user = this.users.find((u) => u.username === username && u.password === password);
-      if (user) {
+    async authenticate(username, password) {
+      const user = this.users.find((u) => u.username === username);
+      if (!user) return false;
+
+      // Vérifier le mot de passe
+      const isPasswordCorrect = await bcrypt.compare(password, user.password);
+      if (isPasswordCorrect) {
         this.currentUser = user;
         localStorage.setItem('currentUser', JSON.stringify(user));
         return true;
       }
       return false;
     },
-    
+
     logout() {
       this.currentUser = null;
       localStorage.removeItem('currentUser');
     },
-    
+
     saveUsers() {
       localStorage.setItem('users', JSON.stringify(this.users));
     },
-    
+
     getCurrentUser() {
       return this.currentUser;
     },
   },
 });
-
-
