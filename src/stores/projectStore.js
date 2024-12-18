@@ -77,11 +77,14 @@ export const useProjectStore = defineStore('projectStore', {
           name: taskName,
           assignedTo: developerId,
           status: 'Non validé',
+          order: project.tasks.length, // Nouvelle propriété pour conserver l'ordre
           comments: [],
         });
         this.saveProjects();
       }
     },
+
+    
 
     // Modifier le statut d'une tâche
     updateTaskStatus(projectId, taskId, newStatus) {

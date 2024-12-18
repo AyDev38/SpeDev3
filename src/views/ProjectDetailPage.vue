@@ -72,22 +72,23 @@
         v-for="status in taskStatuses"
         :key="status"
         class="col-md-4 mb-4"
+        :class="{'bg-light': isDraggingOver === status}"
+        @dragover.prevent="onDragOverColumn(status)"
+        @drop="onDropColumn(status)"
       >
         <div class="card">
           <div class="card-header text-center bg-secondary text-white">
             <h4 class="card-title">{{ status }}</h4>
           </div>
-          <div
-            class="card-body"
-            @dragover.prevent
-            @drop="onDrop(status)"
-          >
+          <div class="card-body">
             <div
               class="card mb-3"
-              v-for="task in getTasksByStatus(status)"
+              v-for="(task, index) in getTasksByStatus(status)"
               :key="task.id"
               draggable="true"
-              @dragstart="onDragStart(task.id)"
+              @dragstart="onDragStart(task.id, status)"
+              @dragover.prevent="onDragOverTask(index)"
+              @drop="onDropTask(index, status)"
             >
               <div class="card-body">
                 <h5 class="card-title">{{ task.name }}</h5>
@@ -135,10 +136,9 @@
                     :key="comment.id"
                     class="list-group-item"
                   >
-                  <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between">
                       <strong>{{ getUserLogin(comment.text.authorId) }}</strong>
                       <small class="text-muted">{{ new Date(comment.createdAt).toLocaleString() }}</small>
-
                       <button
                         v-if="comment.authorId === userId"
                         @click="deleteComment(task.id, comment.id)"
@@ -191,6 +191,8 @@ const developers = ref([]);
 const taskName = ref("");
 const selectedDeveloperId = ref("");
 const draggedTaskId = ref(null);
+const draggedFromStatus = ref(null);
+const isDraggingOver = ref(null);
 
 const newComment = ref({});
 const openComments = ref({});
@@ -208,18 +210,47 @@ onMounted(() => {
 });
 
 const getTasksByStatus = (status) => {
-  return project.value?.tasks.filter((task) => task.status === status) || [];
+  return project.value?.tasks
+    .filter((task) => task.status === status)
+    .sort((a, b) => a.order - b.order) || [];
 };
 
-function onDragStart(taskId) {
+function onDragStart(taskId, status) {
   draggedTaskId.value = taskId;
+  draggedFromStatus.value = status;
 }
 
-function onDrop(newStatus) {
-  if (draggedTaskId.value) {
-    projectStore.updateTaskStatus(project.value.id, draggedTaskId.value, newStatus);
+function onDragOverColumn(status) {
+  isDraggingOver.value = status;
+}
+
+function onDropColumn(status) {
+  if (draggedTaskId.value && draggedFromStatus.value !== status) {
+    const draggedTask = project.value.tasks.find((task) => task.id === draggedTaskId.value);
+    if (draggedTask) {
+      draggedTask.status = status;
+      const targetTasks = getTasksByStatus(status);
+      draggedTask.order = targetTasks.length;
+      projectStore.saveProjects();
+      reloadProject();
+    }
+  }
+  isDraggingOver.value = null;
+}
+
+function onDragOverTask(index) {
+  // Gestion visuelle additionnelle si nécessaire
+}
+
+function onDropTask(index, status) {
+  if (draggedTaskId.value && draggedFromStatus.value === status) {
+    const tasks = getTasksByStatus(status);
+    const draggedTask = tasks.find((task) => task.id === draggedTaskId.value);
+
+    tasks.splice(index, 0, tasks.splice(tasks.indexOf(draggedTask), 1)[0]);
+    tasks.forEach((task, i) => (task.order = i));
+    projectStore.saveProjects();
     reloadProject();
-    draggedTaskId.value = null;
   }
 }
 
@@ -234,9 +265,9 @@ function createTask() {
 
     projectStore.addTaskToProject(project.value.id, taskName.value, developerId);
 
-    taskName.value = ""; 
-    selectedDeveloperId.value = ""; 
-    reloadProject(); 
+    taskName.value = "";
+    selectedDeveloperId.value = "";
+    reloadProject();
   }
 }
 
@@ -256,7 +287,7 @@ function addComment(taskId) {
       authorId: userId.value,
       createdAt: new Date().toISOString(),
     });
-    newComment.value[taskId] = ""; 
+    newComment.value[taskId] = "";
     reloadProject();
   }
 }
