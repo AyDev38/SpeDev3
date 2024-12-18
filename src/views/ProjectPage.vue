@@ -1,3 +1,4 @@
+<!-- src\views\ProjectPage.vue -->
 <template>
   <div class="project-container">
     <h1>Gestion des Projets</h1>
