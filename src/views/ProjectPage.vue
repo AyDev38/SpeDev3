@@ -1,34 +1,66 @@
 <!-- src\views\ProjectPage.vue -->
 <template>
-  <div class="project-container">
-    <h1>Gestion des Projets</h1>
-
-    <!-- Section Ajouter un projet (Manager uniquement) -->
-    <div v-if="isManager" class="add-project-section">
+  <div class="container my-5">
+    <h1 class="text-center">Gestion des Projets</h1>
+    <div v-if="isManager" class="mb-4">
       <h3>Créer un projet</h3>
-      <form @submit.prevent="createProject" class="add-project-form">
-        <input v-model="newProjectName" placeholder="Nom du projet" required />
-        <input v-model="newProjectDeadline" type="date" required placeholder="Échéance" />
-        <button type="submit">Créer</button>
+      <form @submit.prevent="createProject" class="row g-3">
+        <div class="col-md-6">
+          <input
+            v-model="newProjectName"
+            type="text"
+            placeholder="Nom du projet"
+            class="form-control"
+            required
+          />
+        </div>
+        <div class="col-md-4">
+          <input
+            v-model="newProjectDeadline"
+            type="date"
+            class="form-control"
+            required
+          />
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-primary w-100">Créer</button>
+        </div>
       </form>
     </div>
-
-    <!-- Liste des projets sous forme de cartes -->
-    <div class="project-grid">
-      <div v-for="project in projects" :key="project.id" class="project-card">
-        <router-link :to="`/projects/${project.id}`" class="project-title">
-          {{ project.name }}
-        </router-link>
-        <p class="project-deadline">Échéance : {{ project.deadline || 'Non spécifiée' }}</p>
-        <!-- Actions (Manager uniquement) -->
-        <div v-if="isManager" class="project-actions">
-          <button class="edit-btn" @click="editProject(project.id)">Modifier</button>
-          <button class="delete-btn" @click="deleteProject(project.id)">Supprimer</button>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+      <div
+        v-for="project in projects"
+        :key="project.id"
+        class="col"
+      >
+        <div class="card h-100">
+          <div class="card-body">
+            <h5 class="card-title">{{ project.name }}</h5>
+            <p class="card-text">Échéance : {{ project.deadline || 'Non spécifiée' }}</p>
+          </div>
+          <div class="card-footer d-flex justify-content-between">
+            <router-link :to="`/projects/${project.id}`" class="btn btn-link">Détails</router-link>
+            <div v-if="isManager" class="d-flex gap-2">
+              <button
+                @click="editProject(project.id)"
+                class="btn btn-warning btn-sm"
+              >
+                Éditer
+              </button>
+              <button
+                @click="deleteProject(project.id)"
+                class="btn btn-danger btn-sm"
+              >
+                Supprimer
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </template>
+
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
@@ -93,112 +125,3 @@ function deleteProject(id) {
 }
 </script>
 
-<style scoped>
-.project-container {
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-  font-family: Arial, sans-serif;
-}
-
-h1 {
-  text-align: center;
-  color: #333;
-  margin-bottom: 20px;
-}
-
-.add-project-section {
-  margin-bottom: 20px;
-  text-align: center;
-}
-
-.add-project-form input {
-  padding: 8px;
-  margin-right: 10px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-}
-
-.add-project-form button {
-  padding: 8px 15px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.add-project-form button:hover {
-  background-color: #0056b3;
-}
-
-.project-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-}
-
-.project-card {
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  padding: 15px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  transition: box-shadow 0.3s ease;
-}
-
-.project-card:hover {
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-}
-
-.project-title {
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: #007bff;
-  text-decoration: none;
-  margin-bottom: 10px;
-}
-
-.project-title:hover {
-  text-decoration: underline;
-}
-
-.project-actions {
-  display: flex;
-  justify-content: space-between;
-}
-
-button {
-  padding: 5px 10px;
-  cursor: pointer;
-  border: none;
-  border-radius: 5px;
-}
-
-.edit-btn {
-  background-color: #ffc107;
-  color: white;
-}
-
-.edit-btn:hover {
-  background-color: #e0a800;
-}
-
-.delete-btn {
-  background-color: #dc3545;
-  color: white;
-}
-
-.delete-btn:hover {
-  background-color: #c82333;
-}
-
-.project-deadline {
-  color: #666;
-  font-size: 0.9rem;
-  margin-top: 5px;
-}
-</style>

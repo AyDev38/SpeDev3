@@ -1,15 +1,36 @@
 <!-- src\views\LoginPage.vue -->
 <template>
-    <div class="auth-page">
-      <h2>Connexion</h2>
-      <form @submit.prevent="login">
-        <input v-model="username" placeholder="Nom d'utilisateur" required />
-        <input v-model="password" type="password" placeholder="Mot de passe" required />
-        <button type="submit">Se connecter</button>
-      </form>
-      <p v-if="error" class="error">{{ error }}</p>
+  <div class="container mt-5">
+    <div class="card mx-auto" style="max-width: 400px;">
+      <div class="card-body">
+        <h2 class="card-title text-center">Connexion</h2>
+        <form @submit.prevent="login">
+          <div class="mb-3">
+            <input
+              v-model="username"
+              type="text"
+              placeholder="Nom d'utilisateur"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <input
+              v-model="password"
+              type="password"
+              placeholder="Mot de passe"
+              class="form-control"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Se connecter</button>
+        </form>
+        <p v-if="error" class="text-danger mt-2">{{ error }}</p>
+      </div>
     </div>
-  </template>
+  </div>
+</template>
+
   
   <script setup>
   import { ref } from 'vue';
@@ -32,7 +53,4 @@
   }
   </script>
   
-  <style scoped>
-  @import "../styles/auth.css";
-  </style>
   

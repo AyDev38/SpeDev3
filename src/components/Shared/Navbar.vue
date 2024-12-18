@@ -1,24 +1,41 @@
 <!-- src\components\Shared\Navbar.vue -->
 <template>
-  <nav class="navbar">
-    <!-- Section de gauche -->
-    <div>
-      <router-link to="/">Accueil</router-link>
-    </div>
-
-    <!-- Section de droite -->
-    <div>
-      <span v-if="authStore.currentUser" class="username">
-        {{ username }}
-      </span>
-      <button v-if="authStore.currentUser" @click="logout">Déconnexion</button>
-      <template v-else>
-        <router-link to="/login">Login</router-link>
-        <router-link to="/register">Register</router-link>
-      </template>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <router-link class="navbar-brand" to="/">Accueil</router-link>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li v-if="authStore.currentUser" class="nav-item d-flex align-items-center">
+            <span class="text-light me-2">{{ username }}</span>
+            <button
+              @click="logout"
+              class="btn btn-outline-light btn-sm"
+            >
+              Déconnexion
+            </button>
+          </li>
+          <li v-else class="nav-item d-flex">
+            <router-link class="nav-link" to="/login">Login</router-link>
+            <router-link class="nav-link" to="/register">Register</router-link>
+          </li>
+        </ul>
+      </div>
     </div>
   </nav>
 </template>
+
+
 
 <script setup>
 import { computed } from 'vue';
@@ -38,37 +55,4 @@ function logout() {
 </script>
 
 <style scoped>
-/* Styles de la navbar */
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 20px;
-  background: #333;
-  color: white;
-}
-
-a, button {
-  margin: 0 10px;
-  color: white;
-  text-decoration: none;
-}
-
-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 1rem;
-}
-
-button:hover, a:hover {
-  text-decoration: underline;
-}
-
-/* Style pour le nom d'utilisateur */
-.username {
-  margin-right: 15px;
-  font-weight: bold;
-  color: #ffdd57; /* Couleur différente pour le nom */
-}
 </style>

@@ -1,537 +1,288 @@
-<!-- src\views\ProjectDetailPage.vue -->
 <template>
-    <div v-if="project" class="project-detail-container">
-      <!-- Titre du projet -->
-      <header class="project-header">
-        <h1>{{ project.name }}</h1>
-      </header>
-  
-      <!-- Section Managers -->
-      <div class="manager-section card">
-        <h3>Managers assignés</h3>
-        <div class="manager-tags">
-          <span v-for="managerId in project.assignedManagers" :key="managerId" class="tag">
+  <div v-if="project" class="container my-5">
+    <!-- Titre du projet -->
+    <header class="text-center mb-4">
+      <h1>{{ project.name }}</h1>
+    </header>
+
+    <!-- Section Managers -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <h3 class="card-title">Managers assignés</h3>
+        <div class="mb-3">
+          <span
+            v-for="managerId in project.assignedManagers"
+            :key="managerId"
+            class="badge bg-primary me-2"
+          >
             {{ getUserLogin(managerId) }}
           </span>
         </div>
-        <button v-if="isManager && isAssigned" @click="removeManager" class="btn-danger">
-          Me retirer de ce projet
-        </button>
-        <button v-if="isManager && !isAssigned" @click="assignManager" class="btn-primary">
-          M'assigner à ce projet
-        </button>
+        <div>
+          <button
+            v-if="isManager && isAssigned"
+            @click="removeManager"
+            class="btn btn-danger me-2"
+          >
+            Me retirer de ce projet
+          </button>
+          <button
+            v-if="isManager && !isAssigned"
+            @click="assignManager"
+            class="btn btn-primary"
+          >
+            M'assigner à ce projet
+          </button>
+        </div>
       </div>
+    </div>
 
-  
-      <!-- Création de Tâches -->
-      <div v-if="isManager && isAssigned" class="task-creation card">
-        <h3>Créer une tâche</h3>
-        <form @submit.prevent="createTask" class="form-inline">
-          <input v-model="taskName" placeholder="Nom de la tâche" required />
-          <select v-if="isManager" v-model="selectedDeveloperId" required>
-            <option value="" disabled>Choisir un développeur</option>
-            <option v-for="dev in developers" :key="dev.id" :value="dev.id">
-              {{ dev.username }}
-            </option>
-          </select>
-          <button type="submit" class="btn-primary">Créer</button>
+    <!-- Création de Tâches -->
+    <div v-if="isManager && isAssigned" class="card mb-4">
+      <div class="card-body">
+        <h3 class="card-title">Créer une tâche</h3>
+        <form @submit.prevent="createTask" class="row g-3">
+          <div class="col-md-6">
+            <input
+              v-model="taskName"
+              type="text"
+              placeholder="Nom de la tâche"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="col-md-4">
+            <select v-model="selectedDeveloperId" class="form-select" required>
+              <option value="" disabled>Choisir un développeur</option>
+              <option v-for="dev in developers" :key="dev.id" :value="dev.id">
+                {{ dev.username }}
+              </option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">Créer</button>
+          </div>
         </form>
       </div>
-  
-      <!-- Kanban Board -->
-      <div class="kanban-board">
-        <div
-          class="kanban-column"
-          v-for="status in taskStatuses"
-          :key="status"
-          @dragover.prevent
-          @drop="onDrop(status)"
-        >
-          <h3>{{ status }}</h3>
+    </div>
+
+    <!-- Kanban Board -->
+    <div class="row">
+      <div
+        v-for="status in taskStatuses"
+        :key="status"
+        class="col-md-4 mb-4"
+      >
+        <div class="card">
+          <div class="card-header text-center bg-secondary text-white">
+            <h4 class="card-title">{{ status }}</h4>
+          </div>
           <div
-            class="task-card"
-            v-for="task in getTasksByStatus(status)"
-            :key="task.id"
-            draggable="true"
-            @dragstart="onDragStart(task.id)"
+            class="card-body"
+            @dragover.prevent
+            @drop="onDrop(status)"
           >
-            <!-- Nom et développeur assigné -->
-            <div class="task-details">
-              <p class="task-name">{{ task.name }}</p>
-
-              <label v-if="isManager">
-                Assigné à :
-                <select
-                  v-model="task.assignedTo"
-                  @change="updateTaskDeveloper(task.id, task.assignedTo)"
+            <div
+              class="card mb-3"
+              v-for="task in getTasksByStatus(status)"
+              :key="task.id"
+              draggable="true"
+              @dragstart="onDragStart(task.id)"
+            >
+              <div class="card-body">
+                <h5 class="card-title">{{ task.name }}</h5>
+                <p class="card-text">
+                  Assigné à :
+                  <span v-if="isManager">
+                    <select
+                      v-model="task.assignedTo"
+                      class="form-select form-select-sm"
+                      @change="updateTaskDeveloper(task.id, task.assignedTo)"
+                    >
+                      <option v-for="dev in developers" :key="dev.id" :value="dev.id">
+                        {{ dev.username }}
+                      </option>
+                    </select>
+                  </span>
+                  <span v-else>{{ getUserLogin(task.assignedTo) }}</span>
+                </p>
+                <div v-if="isManager" class="d-flex justify-content-between mb-2">
+                  <button
+                    @click="editTaskName(task.id)"
+                    class="btn btn-warning btn-sm"
+                  >
+                    Modifier
+                  </button>
+                  <button
+                    @click="deleteTask(task.id)"
+                    class="btn btn-danger btn-sm"
+                  >
+                    Supprimer
+                  </button>
+                </div>
+                <button
+                  @click="toggleComments(task.id)"
+                  class="btn btn-outline-secondary btn-sm w-100"
                 >
-                  <option v-for="dev in developers" :key="dev.id" :value="dev.id">
-                    {{ dev.username }}
-                  </option>
-                </select>
-              </label>
-              <p v-else>Assigné à : {{ getUserLogin(task.assignedTo) }}</p>
-            </div>
+                  {{ openComments[task.id] ? 'Masquer' : 'Afficher' }} les commentaires
+                </button>
+              </div>
+              <!-- Section des commentaires -->
+              <div v-if="openComments[task.id]" class="mt-3">
+                <div class="list-group">
+                  <div
+                    v-for="comment in task.comments"
+                    :key="comment.id"
+                    class="list-group-item"
+                  >
+                  <div class="d-flex justify-content-between">
+                      <strong>{{ getUserLogin(comment.text.authorId) }}</strong>
+                      <small class="text-muted">{{ new Date(comment.createdAt).toLocaleString() }}</small>
 
-            <!-- Boutons pour les managers -->
-            <div v-if="isManager" class="task-actions">
-              <button @click="editTaskName(task.id)">Modifier le nom</button>
-              <button @click="deleteTask(task.id)" class="btn-delete-task">Supprimer la tâche</button>
-            </div>
-
-            <!-- Bouton pour afficher/masquer les commentaires -->
-            <button @click="toggleComments(task.id)" class="btn-toggle-comments">
-              {{ openComments[task.id] ? 'Masquer' : 'Afficher' }} les commentaires
-            </button>
-
-            <!-- Section des commentaires -->
-            <div v-if="openComments[task.id]" class="task-comments">
-              <h4>Commentaires</h4>
-              <div class="comment-bubble" v-for="comment in task.comments" :key="comment.id">
-              <p class="comment-author">{{ getUserLogin(comment.text.authorId) }}</p>
-              <p class="comment-text">{{ comment.text.text }}</p>
-              <p class="comment-date">{{ new Date(comment.createdAt).toLocaleString() }}</p>
-              
-              <!-- Bouton supprimer commentaire (visible seulement pour l'auteur) -->
-              <button
-                v-if="comment.text.authorId === userId"
-                @click="deleteComment(task.id, comment.id)"
-                class="btn-delete-comment"
-              >
-                Supprimer
-              </button>
-            </div>
-
-              <!-- Ajouter un commentaire -->
-              <div class="add-comment">
-                <input
-                  v-model="newComment[task.id]"
-                  placeholder="Écrire un commentaire..."
-                  class="comment-input"
-                />
-                <button @click="addComment(task.id)" class="btn-add-comment">Ajouter</button>
+                      <button
+                        v-if="comment.authorId === userId"
+                        @click="deleteComment(task.id, comment.id)"
+                        class="btn btn-sm btn-danger"
+                      >
+                        Supprimer
+                      </button>
+                    </div>
+                    <p class="mb-0">{{ comment.text.text }}</p>
+                  </div>
+                </div>
+                <!-- Ajouter un commentaire -->
+                <form @submit.prevent="addComment(task.id)" class="mt-3">
+                  <div class="input-group">
+                    <input
+                      v-model="newComment[task.id]"
+                      type="text"
+                      class="form-control"
+                      placeholder="Écrire un commentaire..."
+                    />
+                    <button type="submit" class="btn btn-primary">Ajouter</button>
+                  </div>
+                </form>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-  
-      <router-link to="/projects" class="back-link">Retour aux projets</router-link>
     </div>
-  </template>
-  
-  <script setup>
-  import { ref, computed, onMounted } from "vue";
-  import { useRoute } from "vue-router";
-  import { useProjectStore } from "@/stores/projectStore";
-  import { useAuthStore } from "@/stores/authStore";
-  
-  const route = useRoute();
-  const projectStore = useProjectStore();
-  const authStore = useAuthStore();
-  
-  const project = ref(null);
-  const developers = ref([]);
-  const taskName = ref("");
-  const selectedDeveloperId = ref("");
-  const draggedTaskId = ref(null);
 
-  const newComment = ref({});
-  const openComments = ref({});
+    <!-- Retour -->
+    <div class="text-center">
+      <router-link to="/projects" class="btn btn-link">Retour aux projets</router-link>
+    </div>
+  </div>
+</template>
 
-  
-  const taskStatuses = ["Non validé", "En cours", "Terminé"];
-  const userId = computed(() => authStore.currentUser?.id);
-  const roles = computed(() => authStore.currentUser?.roles);
-  const isManager = computed(() => roles.value?.includes("manager"));
-  const isAssigned = computed(() => project.value?.assignedManagers.includes(userId.value));
-  
-  onMounted(() => {
-    const projectId = Number(route.params.id);
-    project.value = projectStore.getProjectById(projectId);
-    developers.value = authStore.getDevelopers();
-  });
-  
-  const getTasksByStatus = (status) => {
-    return project.value?.tasks.filter((task) => task.status === status) || [];
-  };
-  
-  function onDragStart(taskId) {
-    draggedTaskId.value = taskId;
+<script setup>
+import { ref, computed, onMounted } from "vue";
+import { useRoute } from "vue-router";
+import { useProjectStore } from "@/stores/projectStore";
+import { useAuthStore } from "@/stores/authStore";
+
+const route = useRoute();
+const projectStore = useProjectStore();
+const authStore = useAuthStore();
+
+const project = ref(null);
+const developers = ref([]);
+const taskName = ref("");
+const selectedDeveloperId = ref("");
+const draggedTaskId = ref(null);
+
+const newComment = ref({});
+const openComments = ref({});
+
+const taskStatuses = ["Non validé", "En cours", "Terminé"];
+const userId = computed(() => authStore.currentUser?.id);
+const roles = computed(() => authStore.currentUser?.roles);
+const isManager = computed(() => roles.value?.includes("manager"));
+const isAssigned = computed(() => project.value?.assignedManagers.includes(userId.value));
+
+onMounted(() => {
+  const projectId = Number(route.params.id);
+  project.value = projectStore.getProjectById(projectId);
+  developers.value = authStore.getDevelopers();
+});
+
+const getTasksByStatus = (status) => {
+  return project.value?.tasks.filter((task) => task.status === status) || [];
+};
+
+function onDragStart(taskId) {
+  draggedTaskId.value = taskId;
+}
+
+function onDrop(newStatus) {
+  if (draggedTaskId.value) {
+    projectStore.updateTaskStatus(project.value.id, draggedTaskId.value, newStatus);
+    reloadProject();
+    draggedTaskId.value = null;
   }
-  
-  function onDrop(newStatus) {
-    if (draggedTaskId.value) {
-      projectStore.updateTaskStatus(project.value.id, draggedTaskId.value, newStatus);
-      reloadProject();
-      draggedTaskId.value = null;
-    }
+}
+
+function assignManager() {
+  projectStore.assignManagerToProject(project.value.id, userId.value);
+  reloadProject();
+}
+
+function createTask() {
+  if (taskName.value) {
+    const developerId = isManager.value ? selectedDeveloperId.value : userId.value;
+
+    projectStore.addTaskToProject(project.value.id, taskName.value, developerId);
+
+    taskName.value = ""; 
+    selectedDeveloperId.value = ""; 
+    reloadProject(); 
   }
-  
-  function assignManager() {
-    projectStore.assignManagerToProject(project.value.id, userId.value);
+}
+
+function reloadProject() {
+  project.value = projectStore.getProjectById(project.value.id);
+}
+
+function getUserLogin(id) {
+  const user = authStore.getUserById(id);
+  return user ? user.username : "Utilisateur inconnu";
+}
+
+function addComment(taskId) {
+  if (newComment.value[taskId]) {
+    projectStore.addCommentToTask(project.value.id, taskId, {
+      text: newComment.value[taskId],
+      authorId: userId.value,
+      createdAt: new Date().toISOString(),
+    });
+    newComment.value[taskId] = ""; 
     reloadProject();
   }
-  
-  function createTask() {
-    if (taskName.value) {
-      const developerId = isManager.value ? selectedDeveloperId.value : userId.value;
+}
 
-      // Assigner la tâche au développeur (choisi si manager, automatique si développeur)
-      projectStore.addTaskToProject(project.value.id, taskName.value, developerId);
+function toggleComments(taskId) {
+  openComments.value[taskId] = !openComments.value[taskId];
+}
 
-      taskName.value = ""; // Réinitialiser le champ de tâche
-      selectedDeveloperId.value = ""; // Réinitialiser le champ du développeur
-      reloadProject(); // Recharger le projet pour afficher la nouvelle tâche
-    }
-  }
-  
-  function reloadProject() {
-    project.value = projectStore.getProjectById(project.value.id);
-  }
-  
-  function getUserLogin(id) {
-    const user = authStore.getUserById(id);
-    return user ? user.username : "Utilisateur inconnu";
-  }
-
-  function addComment(taskId) {
-    if (newComment.value[taskId]) {
-      projectStore.addCommentToTask(project.value.id, taskId, {
-        text: newComment.value[taskId],
-        authorId: userId.value,
-        createdAt: new Date().toISOString(),
-      });
-      newComment.value[taskId] = ""; // Réinitialise le champ de commentaire
-      reloadProject(); // Recharge le projet pour mettre à jour les commentaires
-    }
-  }
-
-
-  function toggleComments(taskId) {
-    openComments.value[taskId] = !openComments.value[taskId];
-  }
-
-  function deleteTask(taskId) {
-    if (confirm("Confirmez-vous la suppression de cette tâche ?")) {
-      projectStore.deleteTask(project.value.id, taskId);
-      reloadProject();
-    }
-  }
-
-
-  // Modifier le nom de la tâche
-  function editTaskName(taskId) {
-    const newName = prompt("Nouveau nom de la tâche :");
-    if (newName) {
-      projectStore.updateTaskName(project.value.id, taskId, newName);
-      reloadProject();
-    }
-  }
-
-  // Modifier le développeur assigné à une tâche
-  function updateTaskDeveloper(taskId, newDeveloperId) {
-    projectStore.updateTaskDeveloper(project.value.id, taskId, newDeveloperId);
+function deleteTask(taskId) {
+  if (confirm("Confirmez-vous la suppression de cette tâche ?")) {
+    projectStore.deleteTask(project.value.id, taskId);
     reloadProject();
   }
+}
 
-  // Supprimer un commentaire
-  function deleteComment(taskId, commentId) {
-    if (confirm("Voulez-vous vraiment supprimer ce commentaire ?")) {
-      projectStore.deleteComment(project.value.id, taskId, commentId, userId.value);
-      reloadProject();
-    }
+function deleteComment(taskId, commentId) {
+  if (confirm("Voulez-vous vraiment supprimer ce commentaire ?")) {
+    projectStore.deleteComment(project.value.id, taskId, commentId, userId.value);
+    reloadProject();
   }
+}
 
-  function removeManager() {
-    if (confirm("Voulez-vous vraiment vous retirer de ce projet ?")) {
-      projectStore.removeManagerFromProject(project.value.id, userId.value);
-      reloadProject();
-    }
+function removeManager() {
+  if (confirm("Voulez-vous vraiment vous retirer de ce projet ?")) {
+    projectStore.removeManagerFromProject(project.value.id, userId.value);
+    reloadProject();
   }
-
-
-  </script>
-  
-  <style scoped>
-  .project-detail-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    font-family: Arial, sans-serif;
-  }
-  
-  .project-header h1 {
-    text-align: center;
-    color: #007bff;
-  }
-  
-  .card {
-    background: white;
-    border: 1px solid #ddd;
-    padding: 15px;
-    margin-bottom: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  .manager-tags .tag {
-    display: inline-block;
-    background: #007bff;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 15px;
-    margin-right: 10px;
-  }
-  
-  .kanban-board {
-    display: flex;
-    gap: 15px;
-  }
-  
-  .kanban-column {
-    flex: 1;
-    background: #f8f8f8;
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  .kanban-column h3 {
-    text-align: center;
-    color: #555;
-  }
-  
-  .task-card {
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 10px;
-    margin-bottom: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    cursor: move;
-  }
-  
-  .task-name {
-    font-weight: bold;
-    color: #333;
-  }
-  
-  .task-details {
-    font-size: 0.9em;
-    color: #666;
-  }
-  
-  .task-creation form {
-    display: flex;
-    gap: 10px;
-  }
-  
-  .form-inline input,
-  .form-inline select,
-  .form-inline button {
-    padding: 8px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-  }
-  
-  .btn-primary {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  .btn-primary:hover {
-    background-color: #0056b3;
-  }
-  
-  .back-link {
-    display: block;
-    margin-top: 20px;
-    text-align: center;
-    color: #007bff;
-    text-decoration: none;
-  }
-  
-  .back-link:hover {
-    text-decoration: underline;
-  }
-
-  .task-comments {
-  margin-top: 20px;
-  padding: 10px;
-  background-color: #f9f9f9;
-  border: 1px solid #ddd;
-  border-radius: 5px;
 }
-
-.comment-item {
-  margin-bottom: 10px;
-  padding-bottom: 5px;
-  border-bottom: 1px solid #eee;
-}
-
-.comment-date {
-  font-size: 0.8rem;
-  color: #888;
-}
-
-.comment-input {
-  width: 100%;
-  padding: 8px;
-  margin-top: 10px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-}
-
-.btn-add-comment {
-  margin-top: 10px;
-  padding: 5px 10px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.btn-add-comment:hover {
-  background-color: #0056b3;
-}
-
-.btn-toggle-comments {
-  margin-top: 10px;
-  padding: 5px 10px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.btn-toggle-comments:hover {
-  background-color: #0056b3;
-}
-
-.task-comments {
-  margin-top: 20px;
-  padding: 10px;
-  background-color: #f9f9f9;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-}
-
-.comment-bubble {
-  background-color: #007bff;
-  color: white;
-  padding: 10px 15px;
-  border-radius: 15px;
-  position: relative;
-  max-width: 70%;
-  word-wrap: break-word;
-  margin-bottom: 10px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-}
-
-.comment-bubble::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: -10px;
-  width: 0;
-  height: 0;
-  border: 10px solid transparent;
-  border-right-color: #007bff;
-  border-left: 0;
-  border-bottom: 0;
-}
-
-.comment-author {
-  font-weight: bold;
-  font-size: 1rem;
-  margin-bottom: 5px;
-}
-
-.comment-text {
-  font-size: 0.95rem;
-}
-
-.comment-date {
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.8);
-  text-align: right;
-}
-
-
-.comment-input {
-  width: calc(100% - 60px);
-  padding: 8px;
-  margin-top: 10px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-}
-
-.btn-add-comment {
-  margin-top: 10px;
-  padding: 5px 10px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.btn-add-comment:hover {
-  background-color: #0056b3;
-}
-
-.task-actions button,
-.comment-bubble button {
-  margin: 5px;
-  padding: 5px 8px;
-  background-color: #ff5e5e;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.task-actions button:hover,
-.comment-bubble button:hover {
-  background-color: #e04848;
-}
-
-.btn-delete-task {
-  margin-top: 5px;
-  padding: 5px 10px;
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.btn-delete-task:hover {
-  background-color: #c82333;
-}
-
-
-.btn-danger {
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.btn-danger:hover {
-  background-color: #c82333;
-}
-
-
-
-  </style>
-  
+</script>
