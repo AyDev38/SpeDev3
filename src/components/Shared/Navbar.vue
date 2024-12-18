@@ -1,11 +1,17 @@
 <!-- src\components\Shared\Navbar.vue -->
 <template>
   <nav class="navbar">
+    <!-- Section de gauche -->
     <div>
       <router-link to="/">Accueil</router-link>
       <router-link v-if="authStore.currentUser" to="/projects">Projets</router-link>
     </div>
+
+    <!-- Section de droite -->
     <div>
+      <span v-if="authStore.currentUser" class="username">
+        {{ username }}
+      </span>
       <button v-if="authStore.currentUser" @click="logout">Déconnexion</button>
       <template v-else>
         <router-link to="/login">Login</router-link>
@@ -16,11 +22,15 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useRouter } from 'vue-router';
 
 const authStore = useAuthStore();
 const router = useRouter();
+
+// Propriété calculée pour obtenir le nom d'utilisateur
+const username = computed(() => authStore.currentUser?.username || 'Utilisateur');
 
 function logout() {
   authStore.logout();
@@ -54,5 +64,12 @@ button {
 
 button:hover, a:hover {
   text-decoration: underline;
+}
+
+/* Style pour le nom d'utilisateur */
+.username {
+  margin-right: 15px;
+  font-weight: bold;
+  color: #ffdd57; /* Couleur différente pour le nom */
 }
 </style>

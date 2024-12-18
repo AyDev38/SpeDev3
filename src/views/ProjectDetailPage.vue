@@ -63,8 +63,8 @@
             <div v-if="openComments[task.id]" class="task-comments">
               <h4>Commentaires</h4>
               <div class="comment-bubble" v-for="comment in task.comments" :key="comment.id">
-                <p class="comment-author">{{ getUserLogin(comment.authorId) }}</p>
-                <p class="comment-text">{{ comment.text }}</p>
+                <p class="comment-author">{{ getUserLogin(comment.text.authorId) }}</p>
+                <p class="comment-text">{{ comment.text.text }}</p>
                 <p class="comment-date">{{ new Date(comment.createdAt).toLocaleString() }}</p>
               </div>
 
@@ -348,41 +348,46 @@
 }
 
 .comment-bubble {
-  margin-bottom: 15px;
-  padding: 10px 15px;
   background-color: #007bff;
   color: white;
+  padding: 10px 15px;
   border-radius: 15px;
   position: relative;
   max-width: 70%;
   word-wrap: break-word;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 .comment-bubble::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 0;
   left: -10px;
+  width: 0;
+  height: 0;
   border: 10px solid transparent;
   border-right-color: #007bff;
   border-left: 0;
-  margin-top: -10px;
+  border-bottom: 0;
 }
 
 .comment-author {
   font-weight: bold;
+  font-size: 1rem;
   margin-bottom: 5px;
 }
 
 .comment-text {
-  margin: 5px 0;
+  font-size: 0.95rem;
 }
 
 .comment-date {
   font-size: 0.8rem;
-  color: #ddd;
+  color: rgba(255, 255, 255, 0.8);
   text-align: right;
 }
+
 
 .comment-input {
   width: calc(100% - 60px);
