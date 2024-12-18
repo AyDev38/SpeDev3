@@ -20,11 +20,11 @@
       </div>
   
       <!-- Création de Tâches -->
-      <div v-if="isManager && isAssigned" class="task-creation card">
+      <div class="task-creation card">
         <h3>Créer une tâche</h3>
         <form @submit.prevent="createTask" class="form-inline">
           <input v-model="taskName" placeholder="Nom de la tâche" required />
-          <select v-model="selectedDeveloperId" required>
+          <select v-if="isManager" v-model="selectedDeveloperId" required>
             <option value="" disabled>Choisir un développeur</option>
             <option v-for="dev in developers" :key="dev.id" :value="dev.id">
               {{ dev.username }}
@@ -142,11 +142,15 @@
   }
   
   function createTask() {
-    if (taskName.value && selectedDeveloperId.value) {
-      projectStore.addTaskToProject(project.value.id, taskName.value, selectedDeveloperId.value);
-      taskName.value = "";
-      selectedDeveloperId.value = "";
-      reloadProject();
+    if (taskName.value) {
+      const developerId = isManager.value ? selectedDeveloperId.value : userId.value;
+
+      // Assigner la tâche au développeur (choisi si manager, automatique si développeur)
+      projectStore.addTaskToProject(project.value.id, taskName.value, developerId);
+
+      taskName.value = ""; // Réinitialiser le champ de tâche
+      selectedDeveloperId.value = ""; // Réinitialiser le champ du développeur
+      reloadProject(); // Recharger le projet pour afficher la nouvelle tâche
     }
   }
   
