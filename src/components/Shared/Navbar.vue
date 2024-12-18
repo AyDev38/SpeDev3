@@ -4,7 +4,6 @@
     <!-- Section de gauche -->
     <div>
       <router-link to="/">Accueil</router-link>
-      <router-link v-if="authStore.currentUser" to="/projects">Projets</router-link>
     </div>
 
     <!-- Section de droite -->
