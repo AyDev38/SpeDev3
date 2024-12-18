@@ -28,7 +28,7 @@ export const useProjectStore = defineStore('projectStore', {
     },
 
     // Ajouter un projet
-    addProject(name, managerId) {
+    addProject(name, managerId, deadline) {
       this.projects.push({
         id: Date.now(),
         name,

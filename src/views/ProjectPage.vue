@@ -8,6 +8,7 @@
       <h3>Créer un projet</h3>
       <form @submit.prevent="createProject" class="add-project-form">
         <input v-model="newProjectName" placeholder="Nom du projet" required />
+        <input v-model="newProjectDeadline" type="date" required placeholder="Échéance" />
         <button type="submit">Créer</button>
       </form>
     </div>
@@ -18,7 +19,7 @@
         <router-link :to="`/projects/${project.id}`" class="project-title">
           {{ project.name }}
         </router-link>
-
+        <p class="project-deadline">Échéance : {{ project.deadline || 'Non spécifiée' }}</p>
         <!-- Actions (Manager uniquement) -->
         <div v-if="isManager" class="project-actions">
           <button class="edit-btn" @click="editProject(project.id)">Modifier</button>
@@ -39,6 +40,7 @@ const authStore = useAuthStore();
 
 const projects = ref([]);
 const newProjectName = ref('');
+const newProjectDeadline = ref("");
 
 // Récupérer les informations de l'utilisateur
 const userId = computed(() => authStore.currentUser?.id);
@@ -64,8 +66,9 @@ watch([userId, roles], () => {
 // Ajouter un projet (Manager uniquement)
 function createProject() {
   if (isManager.value) {
-    projectStore.addProject(newProjectName.value, userId.value);
+    projectStore.addProject(newProjectName.value, userId.value, newProjectDeadline.value);
     newProjectName.value = '';
+    newProjectDeadline.value = '';
     loadProjects();
   } else {
     console.error('Vous devez être Manager pour ajouter un projet.');
@@ -191,5 +194,11 @@ button {
 
 .delete-btn:hover {
   background-color: #c82333;
+}
+
+.project-deadline {
+  color: #666;
+  font-size: 0.9rem;
+  margin-top: 5px;
 }
 </style>
