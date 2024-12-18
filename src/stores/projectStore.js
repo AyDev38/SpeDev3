@@ -123,5 +123,21 @@ export const useProjectStore = defineStore('projectStore', {
     saveProjects() {
       localStorage.setItem('projects', JSON.stringify(this.projects));
     },
+
+    addCommentToTask(projectId, taskId, commentText, userId) {
+      const project = this.getProjectById(projectId);
+      if (project) {
+        const task = project.tasks.find((t) => t.id === taskId);
+        if (task) {
+          task.comments.push({
+            id: Date.now(),
+            text: commentText,
+            createdAt: new Date().toISOString(),
+            authorId: userId,
+          });
+          this.saveProjects();
+        }
+      }
+    },
   },
 });

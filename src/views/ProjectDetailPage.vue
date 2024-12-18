@@ -53,6 +53,33 @@
           >
             <p class="task-name">{{ task.name }}</p>
             <p class="task-details">Assigné à : {{ getUserLogin(task.assignedTo) }}</p>
+
+            <!-- Bouton pour afficher/masquer les commentaires -->
+            <button @click="toggleComments(task.id)" class="btn-toggle-comments">
+              {{ openComments[task.id] ? 'Masquer' : 'Afficher' }} les commentaires
+            </button>
+
+            <!-- Section des commentaires -->
+            <div v-if="openComments[task.id]" class="task-comments">
+              <h4>Commentaires</h4>
+              <div class="comment-bubble" v-for="comment in task.comments" :key="comment.id">
+                <p class="comment-author">{{ getUserLogin(comment.authorId) }}</p>
+                <p class="comment-text">{{ comment.text }}</p>
+                <p class="comment-date">{{ new Date(comment.createdAt).toLocaleString() }}</p>
+              </div>
+
+              <!-- Ajouter un commentaire -->
+              <div class="add-comment">
+                <input
+                  v-model="newComment[task.id]"
+                  placeholder="Écrire un commentaire..."
+                  class="comment-input"
+                />
+                <button @click="addComment(task.id)" class="btn-add-comment">
+                  Ajouter
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -76,6 +103,10 @@
   const taskName = ref("");
   const selectedDeveloperId = ref("");
   const draggedTaskId = ref(null);
+
+  const newComment = ref({});
+  const openComments = ref({});
+
   
   const taskStatuses = ["Non validé", "En cours", "Terminé"];
   const userId = computed(() => authStore.currentUser?.id);
@@ -127,6 +158,24 @@
     const user = authStore.getUserById(id);
     return user ? user.username : "Utilisateur inconnu";
   }
+
+  function addComment(taskId) {
+    if (newComment.value[taskId]) {
+      projectStore.addCommentToTask(project.value.id, taskId, {
+        text: newComment.value[taskId],
+        authorId: userId.value,
+        createdAt: new Date().toISOString(),
+      });
+      newComment.value[taskId] = ""; // Réinitialise le champ de commentaire
+      reloadProject(); // Recharge le projet pour mettre à jour les commentaires
+    }
+  }
+
+
+  function toggleComments(taskId) {
+    openComments.value[taskId] = !openComments.value[taskId];
+  }
+
   </script>
   
   <style scoped>
@@ -234,5 +283,129 @@
   .back-link:hover {
     text-decoration: underline;
   }
+
+  .task-comments {
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.comment-item {
+  margin-bottom: 10px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #eee;
+}
+
+.comment-date {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.comment-input {
+  width: 100%;
+  padding: 8px;
+  margin-top: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.btn-add-comment {
+  margin-top: 10px;
+  padding: 5px 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.btn-add-comment:hover {
+  background-color: #0056b3;
+}
+
+.btn-toggle-comments {
+  margin-top: 10px;
+  padding: 5px 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.btn-toggle-comments:hover {
+  background-color: #0056b3;
+}
+
+.task-comments {
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.comment-bubble {
+  margin-bottom: 15px;
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: white;
+  border-radius: 15px;
+  position: relative;
+  max-width: 70%;
+  word-wrap: break-word;
+}
+
+.comment-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: -10px;
+  border: 10px solid transparent;
+  border-right-color: #007bff;
+  border-left: 0;
+  margin-top: -10px;
+}
+
+.comment-author {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.comment-text {
+  margin: 5px 0;
+}
+
+.comment-date {
+  font-size: 0.8rem;
+  color: #ddd;
+  text-align: right;
+}
+
+.comment-input {
+  width: calc(100% - 60px);
+  padding: 8px;
+  margin-top: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.btn-add-comment {
+  margin-top: 10px;
+  padding: 5px 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.btn-add-comment:hover {
+  background-color: #0056b3;
+}
+
+
   </style>
   
