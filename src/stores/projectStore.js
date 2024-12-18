@@ -33,6 +33,7 @@ export const useProjectStore = defineStore('projectStore', {
         id: Date.now(),
         name,
         managerId,
+        deadline,
         tasks: [],
         assignedManagers: [], // Liste des managers assignés
       });
