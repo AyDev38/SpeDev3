@@ -271,6 +271,12 @@ function createTask() {
   }
 }
 
+function updateTaskDeveloper(taskId, developerId) {
+  projectStore.updateTaskDeveloper(project.value.id, taskId, developerId);
+  reloadProject();
+}
+
+
 function reloadProject() {
   project.value = projectStore.getProjectById(project.value.id);
 }

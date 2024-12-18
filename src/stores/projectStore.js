@@ -93,16 +93,14 @@ export const useProjectStore = defineStore('projectStore', {
       const project = this.getProjectById(projectId);
       if (project) {
         // Vérifie si le manager est toujours assigné
-        if (!project.assignedManagers.includes(developerId)) {
-          throw new Error("Vous ne pouvez pas ajouter de tâche à ce projet.");
-        }
         project.tasks.push({
           id: Date.now(),
           name: taskName,
           assignedTo: developerId,
           status: 'Non validé',
-          order: project.tasks.length, // Nouvelle propriété pour conserver l'ordre
+          order: project.tasks.length,
           comments: [],
+          validated: false,
         });
         this.saveProjects();
       }
