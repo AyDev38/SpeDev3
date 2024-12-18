@@ -139,5 +139,42 @@ export const useProjectStore = defineStore('projectStore', {
         }
       }
     },
+
+    // Modifier le nom d'une tâche
+    updateTaskName(projectId, taskId, newName) {
+      const project = this.getProjectById(projectId);
+      if (project) {
+        const task = project.tasks.find((t) => t.id === taskId);
+        if (task) {
+          task.name = newName;
+          this.saveProjects();
+        }
+      }
+    },
+
+    // Supprimer une tâche
+    deleteTask(projectId, taskId) {
+      const project = this.getProjectById(projectId);
+      if (project) {
+        project.tasks = project.tasks.filter((task) => task.id !== taskId);
+        this.saveProjects();
+      }
+    },
+
+    // Supprimer un commentaire spécifique
+    deleteComment(projectId, taskId, commentId, userId) {
+      const project = this.getProjectById(projectId);
+      if (project) {
+        const task = project.tasks.find((t) => t.id === taskId);
+        if (task) {
+          task.comments = task.comments.filter(
+            (comment) => !(comment.id === commentId && comment.text.authorId === userId)
+          );
+          
+          this.saveProjects();
+        }
+      }
+    },
+
   },
 });

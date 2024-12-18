@@ -51,8 +51,29 @@
             draggable="true"
             @dragstart="onDragStart(task.id)"
           >
-            <p class="task-name">{{ task.name }}</p>
-            <p class="task-details">Assigné à : {{ getUserLogin(task.assignedTo) }}</p>
+            <!-- Nom et développeur assigné -->
+            <div class="task-details">
+              <p class="task-name">{{ task.name }}</p>
+
+              <label v-if="isManager">
+                Assigné à :
+                <select
+                  v-model="task.assignedTo"
+                  @change="updateTaskDeveloper(task.id, task.assignedTo)"
+                >
+                  <option v-for="dev in developers" :key="dev.id" :value="dev.id">
+                    {{ dev.username }}
+                  </option>
+                </select>
+              </label>
+              <p v-else>Assigné à : {{ getUserLogin(task.assignedTo) }}</p>
+            </div>
+
+            <!-- Boutons pour les managers -->
+            <div v-if="isManager" class="task-actions">
+              <button @click="editTaskName(task.id)">Modifier le nom</button>
+              <button @click="deleteTask(task.id)" class="btn-delete-task">Supprimer la tâche</button>
+            </div>
 
             <!-- Bouton pour afficher/masquer les commentaires -->
             <button @click="toggleComments(task.id)" class="btn-toggle-comments">
@@ -63,10 +84,19 @@
             <div v-if="openComments[task.id]" class="task-comments">
               <h4>Commentaires</h4>
               <div class="comment-bubble" v-for="comment in task.comments" :key="comment.id">
-                <p class="comment-author">{{ getUserLogin(comment.text.authorId) }}</p>
-                <p class="comment-text">{{ comment.text.text }}</p>
-                <p class="comment-date">{{ new Date(comment.createdAt).toLocaleString() }}</p>
-              </div>
+              <p class="comment-author">{{ getUserLogin(comment.text.authorId) }}</p>
+              <p class="comment-text">{{ comment.text.text }}</p>
+              <p class="comment-date">{{ new Date(comment.createdAt).toLocaleString() }}</p>
+              
+              <!-- Bouton supprimer commentaire (visible seulement pour l'auteur) -->
+              <button
+                v-if="comment.text.authorId === userId"
+                @click="deleteComment(task.id, comment.id)"
+                class="btn-delete-comment"
+              >
+                Supprimer
+              </button>
+            </div>
 
               <!-- Ajouter un commentaire -->
               <div class="add-comment">
@@ -75,14 +105,13 @@
                   placeholder="Écrire un commentaire..."
                   class="comment-input"
                 />
-                <button @click="addComment(task.id)" class="btn-add-comment">
-                  Ajouter
-                </button>
+                <button @click="addComment(task.id)" class="btn-add-comment">Ajouter</button>
               </div>
             </div>
           </div>
         </div>
       </div>
+
   
       <router-link to="/projects" class="back-link">Retour aux projets</router-link>
     </div>
@@ -179,6 +208,38 @@
   function toggleComments(taskId) {
     openComments.value[taskId] = !openComments.value[taskId];
   }
+
+  function deleteTask(taskId) {
+    if (confirm("Confirmez-vous la suppression de cette tâche ?")) {
+      projectStore.deleteTask(project.value.id, taskId);
+      reloadProject();
+    }
+  }
+
+
+  // Modifier le nom de la tâche
+  function editTaskName(taskId) {
+    const newName = prompt("Nouveau nom de la tâche :");
+    if (newName) {
+      projectStore.updateTaskName(project.value.id, taskId, newName);
+      reloadProject();
+    }
+  }
+
+  // Modifier le développeur assigné à une tâche
+  function updateTaskDeveloper(taskId, newDeveloperId) {
+    projectStore.updateTaskDeveloper(project.value.id, taskId, newDeveloperId);
+    reloadProject();
+  }
+
+  // Supprimer un commentaire
+  function deleteComment(taskId, commentId) {
+    if (confirm("Voulez-vous vraiment supprimer ce commentaire ?")) {
+      projectStore.deleteComment(project.value.id, taskId, commentId, userId.value);
+      reloadProject();
+    }
+  }
+
 
   </script>
   
@@ -413,6 +474,36 @@
 
 .btn-add-comment:hover {
   background-color: #0056b3;
+}
+
+.task-actions button,
+.comment-bubble button {
+  margin: 5px;
+  padding: 5px 8px;
+  background-color: #ff5e5e;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.task-actions button:hover,
+.comment-bubble button:hover {
+  background-color: #e04848;
+}
+
+.btn-delete-task {
+  margin-top: 5px;
+  padding: 5px 10px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.btn-delete-task:hover {
+  background-color: #c82333;
 }
 
 
