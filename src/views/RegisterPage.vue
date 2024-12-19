@@ -1,19 +1,49 @@
 <template>
-  <div class="auth-page">
-    <h2>Inscription</h2>
-    <form @submit.prevent="register">
-      <input v-model="username" placeholder="Nom d'utilisateur" required />
-      <input v-model="password" type="password" placeholder="Mot de passe" required />
-      <label>
-        <input type="checkbox" v-model="roles.manager" /> Manager
-      </label>
-      <label>
-        <input type="checkbox" v-model="roles.developer" /> Developer
-      </label>
-      <button type="submit">S'inscrire</button>
-    </form>
-    <p v-if="message" :class="{ success: success, error: !success }">{{ message }}</p>
-    <p>Déjà un compte ? <router-link to="/login">Se connecter</router-link></p>
+  <div class="container mt-5">
+    <div class="card mx-auto" style="max-width: 400px;">
+      <div class="card-body">
+        <h2 class="card-title text-center">Inscription</h2>
+        <form @submit.prevent="register">
+          <div class="mb-3">
+            <input
+              v-model="username"
+              type="text"
+              placeholder="Nom d'utilisateur"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <input
+              v-model="password"
+              type="password"
+              placeholder="Mot de passe"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-check-label">
+              <input type="checkbox" v-model="roles.manager" class="form-check-input" />
+              Manager
+            </label>
+          </div>
+          <div class="mb-3">
+            <label class="form-check-label">
+              <input type="checkbox" v-model="roles.developer" class="form-check-input" />
+              Développeur
+            </label>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">S'inscrire</button>
+        </form>
+        <p v-if="message" :class="success ? 'text-success mt-2' : 'text-danger mt-2'">
+          {{ message }}
+        </p>
+        <p class="mt-3 text-center">
+          Déjà un compte ? <router-link to="/login" class="text-decoration-none">Se connecter</router-link>
+        </p>
+      </div>
+    </div>
   </div>
 </template>
 
