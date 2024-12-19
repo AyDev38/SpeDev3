@@ -28,12 +28,13 @@ export const useProjectStore = defineStore('projectStore', {
     },
 
     // Ajouter un projet
-    addProject(name, managerId, deadline) {
+    addProject(name, managerId, deadline, createdat) {
       this.projects.push({
         id: Date.now(),
         name,
         managerId,
         deadline,
+        createdat,
         tasks: [],
         assignedManagers: [], // Liste des managers assignés
       });

@@ -4,6 +4,9 @@
     <!-- Titre du projet -->
     <header class="text-center mb-4">
       <h1>{{ project.name }}</h1>
+      <p class="text-muted">
+        Créé le : {{ formatDate(project.createdat) }} | Date de fin : {{ formatDate(project.deadline) }}
+      </p>
     </header>
 
     <!-- Section Managers -->
@@ -388,5 +391,11 @@ function unvalidateTask(task) {
   task.validated = false;
   projectStore.updateTask(project.value.id, task);
   reloadProject();
+}
+
+function formatDate(timestamp) {
+  if (!timestamp) return "Non spécifiée";
+  const options = { year: 'numeric', month: 'long', day: 'numeric' };
+  return new Date(timestamp).toLocaleDateString("fr-FR", options);
 }
 </script>
