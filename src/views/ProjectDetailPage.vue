@@ -94,6 +94,7 @@
               v-for="(task, index) in getTasksByStatus(status)"
               :key="task.id"
               class="card mb-3"
+              :class="{ 'draggable-task': !task.validated, 'not-draggable': task.validated }"
               :draggable="!task.validated"
               @dragstart="!task.validated && onDragStart(task.id, status)"
               @dragover.prevent="!task.validated && onDragOverTask(index)"
@@ -415,3 +416,22 @@ function formatDate(timestamp) {
   return new Date(timestamp).toLocaleDateString("fr-FR", options);
 }
 </script>
+
+
+<style scoped>
+
+.draggable-task {
+  cursor: grab;
+}
+
+.draggable-task:active {
+  cursor: grabbing;
+}
+
+.not-draggable {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+
+</style>
