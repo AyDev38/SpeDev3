@@ -101,6 +101,9 @@
             >
               <div class="card-body">
                 <h5 class="card-title">{{ task.name }}</h5>
+                <div v-if="task.validated" class="badge bg-success d-flex align-items-center">
+                  <i class="bi bi-check-circle me-2"></i> Validée
+                </div>
                 <p class="card-text">
                   Assigné à :
                   <span v-if="isManager">
