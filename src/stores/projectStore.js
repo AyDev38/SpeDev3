@@ -1,5 +1,6 @@
 // src/stores/projectStore.js
 import { defineStore } from 'pinia';
+import { useAuthStore } from './authStore.js';
 
 export const useProjectStore = defineStore('projectStore', {
   state: () => ({
@@ -10,6 +11,15 @@ export const useProjectStore = defineStore('projectStore', {
     // Obtenir tous les projets
     getProjects() {
       return this.projects;
+    },
+
+    // Obtenir un projet par ID
+    getProjectByIdSecure(projectId, userId, isManager=false) {
+      var projectRecup = null;
+      console.log(isManager)
+      projectRecup =  this.projects.find((project) => project.id === projectId);
+      const hasTaskWithUser = projectRecup.tasks.some((task) => task.assignedTo === userId);
+      if (isManager || hasTaskWithUser ) return projectRecup
     },
 
     // Obtenir un projet par ID

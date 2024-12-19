@@ -217,11 +217,12 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useProjectStore } from "@/stores/projectStore";
 import { useAuthStore } from "@/stores/authStore";
 
 const route = useRoute();
+const router = useRouter();
 const projectStore = useProjectStore();
 const authStore = useAuthStore();
 
@@ -246,8 +247,14 @@ const isAssigned = computed(() =>
 
 onMounted(() => {
   const projectId = Number(route.params.id);
-  project.value = projectStore.getProjectById(projectId);
-  developers.value = authStore.getDevelopers();
+  project.value = projectStore.getProjectByIdSecure(projectId, userId.value, isManager.value);
+  if (!project.value) {
+    // Redirection vers la page 404 si aucun projet n'est trouvé
+    router.push({ name: 'NotFound' });
+  } else {
+    developers.value = authStore.getDevelopers();
+  }
+  console.log("PROJECT.VALUE", project.value)
 });
 
 const getTasksByStatus = (status) => {

@@ -15,7 +15,7 @@ const routes = [
   { path: '/register', component: RegisterPage, meta: { requiresGuest: true } },
   { path: '/projects', component: ProjectPage, meta: { requiresAuth: true } },
   { path: '/projects/:id', component: ProjectDetailPage, meta: { requiresAuth: true } },
-  { path: '/:pathMatch(.*)*', component: NotFoundPage },
+  { path: '/:pathMatch(.*)*', name:"NotFound", component: NotFoundPage },
 ];
 
 const router = createRouter({
