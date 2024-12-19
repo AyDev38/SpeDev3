@@ -202,15 +202,14 @@ export const useProjectStore = defineStore('projectStore', {
     },
 
     // Supprimer un commentaire spécifique
-    deleteComment(projectId, taskId, commentId, userId) {
+    deleteComment(projectId, taskId, commentId) {
       const project = this.getProjectById(projectId);
       if (project) {
         const task = project.tasks.find((t) => t.id === taskId);
         if (task) {
           task.comments = task.comments.filter(
-            (comment) => !(comment.id === commentId && comment.text.authorId === userId)
+            (comment) => comment.id !== commentId
           );
-          
           this.saveProjects();
         }
       }
