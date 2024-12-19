@@ -73,7 +73,7 @@
         v-for="status in taskStatuses"
         :key="status"
         class="col-md-4 mb-4"
-        :class="{'bg-light': isDraggingOver === status}"
+        :class="{ 'bg-light': isDraggingOver === status }"
         @dragover.prevent="onDragOverColumn(status)"
         @drop="onDropColumn(status)"
       >
@@ -83,13 +83,13 @@
           </div>
           <div class="card-body">
             <div
-              class="card mb-3"
               v-for="(task, index) in getTasksByStatus(status)"
               :key="task.id"
-              draggable="true"
-              @dragstart="onDragStart(task.id, status)"
-              @dragover.prevent="onDragOverTask(index)"
-              @drop="onDropTask(index, status)"
+              class="card mb-3"
+              :draggable="!task.validated"
+              @dragstart="!task.validated && onDragStart(task.id, status)"
+              @dragover.prevent="!task.validated && onDragOverTask(index)"
+              @drop="!task.validated && onDropTask(index, status)"
             >
               <div class="card-body">
                 <h5 class="card-title">{{ task.name }}</h5>
@@ -100,24 +100,55 @@
                       v-model="task.assignedTo"
                       class="form-select form-select-sm"
                       @change="updateTaskDeveloper(task.id, task.assignedTo)"
+                      :disabled="task.validated"
                     >
-                      <option v-for="dev in developers" :key="dev.id" :value="dev.id">
+                      <option
+                        v-for="dev in developers"
+                        :key="dev.id"
+                        :value="dev.id"
+                      >
                         {{ dev.username }}
                       </option>
                     </select>
                   </span>
                   <span v-else>{{ getUserLogin(task.assignedTo) }}</span>
                 </p>
-                <div v-if="isManager" class="d-flex justify-content-between mb-2">
-                  <button
-                    @click="editTaskName(task.id)"
-                    class="btn btn-warning btn-sm"
+                <div class="d-flex justify-content-between mb-2">
+                  <div
+                    v-if="isManager"
+                    class="d-flex justify-content-between mb-2"
                   >
-                    Modifier
-                  </button>
+                    <button
+                      @click="editTaskName(task.id)"
+                      class="btn btn-warning btn-sm"
+                      :disabled="task.validated"
+                    >
+                      Modifier
+                    </button>
+                  </div>
+                  <div
+                    v-if="isManager"
+                    class="d-flex justify-content-between mb-2"
+                  >
+                    <button
+                      v-if="task.status === 'Terminé' && !task.validated"
+                      @click="validateTask(task)"
+                      class="btn btn-success btn-sm"
+                    >
+                      Valider
+                    </button>
+                    <button
+                      v-if="task.validated"
+                      @click="unvalidateTask(task)"
+                      class="btn btn-warning btn-sm"
+                    >
+                      Dévalider
+                    </button>
+                  </div>
                   <button
                     @click="deleteTask(task.id)"
                     class="btn btn-danger btn-sm"
+                    :disabled="task.validated"
                   >
                     Supprimer
                   </button>
@@ -126,7 +157,8 @@
                   @click="toggleComments(task.id)"
                   class="btn btn-outline-secondary btn-sm w-100"
                 >
-                  {{ openComments[task.id] ? 'Masquer' : 'Afficher' }} les commentaires
+                  {{ openComments[task.id] ? "Masquer" : "Afficher" }} les
+                  commentaires
                 </button>
               </div>
               <!-- Section des commentaires -->
@@ -139,7 +171,9 @@
                   >
                     <div class="d-flex justify-content-between">
                       <strong>{{ getUserLogin(comment.text.authorId) }}</strong>
-                      <small class="text-muted">{{ new Date(comment.createdAt).toLocaleString() }}</small>
+                      <small class="text-muted">{{
+                        new Date(comment.createdAt).toLocaleString()
+                      }}</small>
                       <button
                         v-if="comment.authorId === userId"
                         @click="deleteComment(task.id, comment.id)"
@@ -160,7 +194,9 @@
                       class="form-control"
                       placeholder="Écrire un commentaire..."
                     />
-                    <button type="submit" class="btn btn-primary">Ajouter</button>
+                    <button type="submit" class="btn btn-primary">
+                      Ajouter
+                    </button>
                   </div>
                 </form>
               </div>
@@ -172,7 +208,9 @@
 
     <!-- Retour -->
     <div class="text-center">
-      <router-link to="/projects" class="btn btn-link">Retour aux projets</router-link>
+      <router-link to="/projects" class="btn btn-link"
+        >Retour aux projets</router-link
+      >
     </div>
   </div>
 </template>
@@ -202,7 +240,9 @@ const taskStatuses = ["Non validé", "En cours", "Terminé"];
 const userId = computed(() => authStore.currentUser?.id);
 const roles = computed(() => authStore.currentUser?.roles);
 const isManager = computed(() => roles.value?.includes("manager"));
-const isAssigned = computed(() => project.value?.assignedManagers.includes(userId.value));
+const isAssigned = computed(() =>
+  project.value?.assignedManagers.includes(userId.value)
+);
 
 onMounted(() => {
   const projectId = Number(route.params.id);
@@ -211,9 +251,11 @@ onMounted(() => {
 });
 
 const getTasksByStatus = (status) => {
-  return project.value?.tasks
-    .filter((task) => task.status === status)
-    .sort((a, b) => a.order - b.order) || [];
+  return (
+    project.value?.tasks
+      .filter((task) => task.status === status)
+      .sort((a, b) => a.order - b.order) || []
+  );
 };
 
 function onDragStart(taskId, status) {
@@ -227,7 +269,9 @@ function onDragOverColumn(status) {
 
 function onDropColumn(status) {
   if (draggedTaskId.value && draggedFromStatus.value !== status) {
-    const draggedTask = project.value.tasks.find((task) => task.id === draggedTaskId.value);
+    const draggedTask = project.value.tasks.find(
+      (task) => task.id === draggedTaskId.value
+    );
     if (draggedTask) {
       draggedTask.status = status;
       const targetTasks = getTasksByStatus(status);
@@ -262,9 +306,15 @@ function assignManager() {
 
 function createTask() {
   if (taskName.value) {
-    const developerId = isManager.value ? selectedDeveloperId.value : userId.value;
+    const developerId = isManager.value
+      ? selectedDeveloperId.value
+      : userId.value;
 
-    projectStore.addTaskToProject(project.value.id, taskName.value, developerId);
+    projectStore.addTaskToProject(
+      project.value.id,
+      taskName.value,
+      developerId
+    );
 
     taskName.value = "";
     selectedDeveloperId.value = "";
@@ -276,7 +326,6 @@ function updateTaskDeveloper(taskId, developerId) {
   projectStore.updateTaskDeveloper(project.value.id, taskId, developerId);
   reloadProject();
 }
-
 
 function reloadProject() {
   project.value = projectStore.getProjectById(project.value.id);
@@ -312,7 +361,12 @@ function deleteTask(taskId) {
 
 function deleteComment(taskId, commentId) {
   if (confirm("Voulez-vous vraiment supprimer ce commentaire ?")) {
-    projectStore.deleteComment(project.value.id, taskId, commentId, userId.value);
+    projectStore.deleteComment(
+      project.value.id,
+      taskId,
+      commentId,
+      userId.value
+    );
     reloadProject();
   }
 }
@@ -322,5 +376,17 @@ function removeManager() {
     projectStore.removeManagerFromProject(project.value.id, userId.value);
     reloadProject();
   }
+}
+
+function validateTask(task) {
+  task.validated = true;
+  projectStore.updateTask(project.value.id, task);
+  reloadProject();
+}
+
+function unvalidateTask(task) {
+  task.validated = false;
+  projectStore.updateTask(project.value.id, task);
+  reloadProject();
 }
 </script>
