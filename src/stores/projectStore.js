@@ -70,7 +70,7 @@ export const useProjectStore = defineStore('projectStore', {
       const project = this.getProjectById(projectId);
       if (project) {
         const totalTasks = project.tasks.length;
-        const nonValidated = project.tasks.filter(task => task.status === "À valider").length;
+        const nonValidated = project.tasks.filter(task => task.status === "À faire").length;
         const inProgress = project.tasks.filter(task => task.status === "En cours").length;
         const completed = project.tasks.filter(task => task.status === "Terminée").length;
     
