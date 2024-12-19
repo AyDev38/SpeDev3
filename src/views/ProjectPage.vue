@@ -114,7 +114,8 @@ watch([userId, roles], () => {
 // Ajouter un projet (Manager uniquement)
 function createProject() {
   if (isManager.value) {
-    projectStore.addProject(newProjectName.value, userId.value, newProjectDeadline.value);
+    const currentTimestamp = Date.now();
+    projectStore.addProject(newProjectName.value, userId.value, newProjectDeadline.value, currentTimestamp);
     newProjectName.value = '';
     newProjectDeadline.value = '';
     loadProjects();

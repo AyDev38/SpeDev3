@@ -4,6 +4,9 @@
     <!-- Titre du projet -->
     <header class="text-center mb-4">
       <h1>{{ project.name }}</h1>
+      <p class="text-muted">
+        Créé le : {{ formatDate(project.createdat) }} | Date de fin : {{ formatDate(project.deadline) }}
+      </p>
     </header>
 
     <!-- Section Managers -->
@@ -39,20 +42,23 @@
     </div>
 
     <!-- Création de Tâches -->
-    <div v-if="isManager && isAssigned" class="card mb-4">
+    <div v-if="isManager && isAssigned || !isManager" class="card mb-4">
       <div class="card-body">
         <h3 class="card-title">Créer une tâche</h3>
         <form @submit.prevent="createTask" class="row g-3">
+          <!-- Champ pour le nom de la tâche -->
           <div class="col-md-6">
             <input
               v-model="taskName"
+              @input="taskName = sanitizeInput(taskName)"
               type="text"
               placeholder="Nom de la tâche"
               class="form-control"
               required
             />
           </div>
-          <div class="col-md-4">
+          <!-- Sélection du développeur assigné -->
+          <div v-if="isManager && isAssigned" class="col-md-4">
             <select v-model="selectedDeveloperId" class="form-select" required>
               <option value="" disabled>Choisir un développeur</option>
               <option v-for="dev in developers" :key="dev.id" :value="dev.id">
@@ -60,6 +66,7 @@
               </option>
             </select>
           </div>
+          <!-- Bouton pour soumettre -->
           <div class="col-md-2">
             <button type="submit" class="btn btn-primary w-100">Créer</button>
           </div>
@@ -145,7 +152,7 @@
                       Dévalider
                     </button>
                   </div>
-                  <button
+                  <button v-if="isManager"
                     @click="deleteTask(task.id)"
                     class="btn btn-danger btn-sm"
                     :disabled="task.validated"
@@ -164,18 +171,14 @@
               <!-- Section des commentaires -->
               <div v-if="openComments[task.id]" class="mt-3">
                 <div class="list-group">
-                  <div
-                    v-for="comment in task.comments"
-                    :key="comment.id"
-                    class="list-group-item"
-                  >
+                  <div v-for="comment in task.comments" :key="comment.id" class="list-group-item">
                     <div class="d-flex justify-content-between">
                       <strong>{{ getUserLogin(comment.text.authorId) }}</strong>
                       <small class="text-muted">{{
                         new Date(comment.createdAt).toLocaleString()
                       }}</small>
                       <button
-                        v-if="comment.authorId === userId"
+                        v-if="comment.text.authorId === userId"
                         @click="deleteComment(task.id, comment.id)"
                         class="btn btn-sm btn-danger"
                       >
@@ -395,5 +398,11 @@ function unvalidateTask(task) {
   task.validated = false;
   projectStore.updateTask(project.value.id, task);
   reloadProject();
+}
+
+function formatDate(timestamp) {
+  if (!timestamp) return "Non spécifiée";
+  const options = { year: 'numeric', month: 'long', day: 'numeric' };
+  return new Date(timestamp).toLocaleDateString("fr-FR", options);
 }
 </script>
