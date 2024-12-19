@@ -192,13 +192,10 @@ export const useProjectStore = defineStore('projectStore', {
 
     // Supprimer un commentaire spécifique
     deleteComment(projectId, taskId, commentId) {
-      console.log('bouton appuyé');
       const project = this.getProjectById(projectId);
       if (project) {
-        console.log('1');
         const task = project.tasks.find((t) => t.id === taskId);
         if (task) {
-          console.log('2');
           task.comments = task.comments.filter(
             (comment) => comment.id !== commentId
           );
