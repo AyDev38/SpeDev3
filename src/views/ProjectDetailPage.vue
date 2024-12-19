@@ -143,7 +143,7 @@
                     class="d-flex justify-content-between mb-2"
                   >
                     <button
-                      v-if="task.status === 'Terminé' && !task.validated"
+                      v-if="task.status === 'Terminée' && !task.validated"
                       @click="validateTask(task)"
                       class="btn btn-success btn-sm"
                     >
