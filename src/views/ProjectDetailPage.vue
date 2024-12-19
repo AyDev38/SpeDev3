@@ -245,7 +245,7 @@ const isDraggingOver = ref(null);
 const newComment = ref({});
 const openComments = ref({});
 
-const taskStatuses = ["Non validé", "En cours", "Terminé"];
+const taskStatuses = ["À valider", "En cours", "Terminée"];
 const userId = computed(() => authStore.currentUser?.id);
 const roles = computed(() => authStore.currentUser?.roles);
 const isManager = computed(() => roles.value?.includes("manager"));

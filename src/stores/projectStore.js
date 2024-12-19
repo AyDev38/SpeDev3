@@ -70,9 +70,9 @@ export const useProjectStore = defineStore('projectStore', {
       const project = this.getProjectById(projectId);
       if (project) {
         const totalTasks = project.tasks.length;
-        const nonValidated = project.tasks.filter(task => task.status === "Non validé").length;
+        const nonValidated = project.tasks.filter(task => task.status === "À valider").length;
         const inProgress = project.tasks.filter(task => task.status === "En cours").length;
-        const completed = project.tasks.filter(task => task.status === "Terminé").length;
+        const completed = project.tasks.filter(task => task.status === "Terminée").length;
     
         return { totalTasks, nonValidated, inProgress, completed };
       }
@@ -108,7 +108,7 @@ export const useProjectStore = defineStore('projectStore', {
           id: Date.now(),
           name: taskName,
           assignedTo: developerId,
-          status: 'Non validé',
+          status: 'À valider',
           order: project.tasks.length,
           comments: [],
           validated: false,
@@ -240,7 +240,7 @@ export const useProjectStore = defineStore('projectStore', {
       const project = this.getProjectById(projectId);
       if (project) {
         const task = project.tasks.find((t) => t.id === taskId);
-        if (task && task.status === "Terminé") {
+        if (task && task.status === "Terminée") {
           task.validated = true;
           this.saveProjects();
         }
