@@ -4,6 +4,7 @@
     <!-- Titre du projet -->
     <header class="text-center mb-4">
       <h1>{{ project.name }}</h1>
+      <!-- Info sur les dates du projets -->
       <p class="text-muted">
         Créé le : {{ formatDate(project.createdat) }} | Date de fin : {{ formatDate(project.deadline) }}
       </p>
@@ -130,7 +131,7 @@
                       class="btn btn-warning btn-sm"
                       :disabled="task.validated"
                     >
-                      Modifier
+                      Modifier Nom
                     </button>
                   </div>
                   <div
@@ -336,6 +337,14 @@ function updateTaskDeveloper(taskId, developerId) {
   projectStore.updateTaskDeveloper(project.value.id, taskId, developerId);
   reloadProject();
 }
+
+function editTaskName(taskId) {
+    const newName = prompt("Nouveau nom de la tâche :");
+    if (newName) {
+      projectStore.updateTaskName(project.value.id, taskId, newName);
+      reloadProject();
+    }
+  }
 
 function reloadProject() {
   project.value = projectStore.getProjectById(project.value.id);

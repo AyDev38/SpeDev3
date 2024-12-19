@@ -62,7 +62,7 @@
                 @click="editProject(project.id)"
                 class="btn btn-warning btn-sm"
               >
-                Éditer
+                Modifier Nom
               </button>
               <button
                 @click="deleteProject(project.id)"
