@@ -132,16 +132,12 @@
               <!-- Section des commentaires -->
               <div v-if="openComments[task.id]" class="mt-3">
                 <div class="list-group">
-                  <div
-                    v-for="comment in task.comments"
-                    :key="comment.id"
-                    class="list-group-item"
-                  >
+                  <div v-for="comment in task.comments" :key="comment.id" class="list-group-item">
                     <div class="d-flex justify-content-between">
                       <strong>{{ getUserLogin(comment.text.authorId) }}</strong>
                       <small class="text-muted">{{ new Date(comment.createdAt).toLocaleString() }}</small>
                       <button
-                        v-if="comment.authorId === userId"
+                        v-if="comment.text.authorId === userId"
                         @click="deleteComment(task.id, comment.id)"
                         class="btn btn-sm btn-danger"
                       >
