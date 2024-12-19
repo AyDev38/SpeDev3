@@ -214,6 +214,30 @@ export const useProjectStore = defineStore('projectStore', {
       }
     },
 
+    // Valider une tâche
+    validateTask(projectId, taskId) {
+      const project = this.getProjectById(projectId);
+      if (project) {
+        const task = project.tasks.find((t) => t.id === taskId);
+        if (task && task.status === "Terminé") {
+          task.validated = true;
+          this.saveProjects();
+        }
+      }
+    },
+
+    // Dévalider une tâche
+    invalidateTask(projectId, taskId) {
+      const project = this.getProjectById(projectId);
+      if (project) {
+        const task = project.tasks.find((t) => t.id === taskId);
+        if (task) {
+          task.validated = false;
+          this.saveProjects();
+        }
+      }
+    },
+
 
   },
 });

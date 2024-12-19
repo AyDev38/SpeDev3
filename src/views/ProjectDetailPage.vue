@@ -1,3 +1,4 @@
+<!-- src\views\ProjectDetailPage.vue -->
 <template>
   <div v-if="project" class="container my-5">
     <!-- Titre du projet -->
