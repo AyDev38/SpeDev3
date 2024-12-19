@@ -149,7 +149,7 @@
                       Dévalider
                     </button>
                   </div>
-                  <button
+                  <button v-if="isManager"
                     @click="deleteTask(task.id)"
                     class="btn btn-danger btn-sm"
                     :disabled="task.validated"
