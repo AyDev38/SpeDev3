@@ -120,6 +120,17 @@ export const useProjectStore = defineStore('projectStore', {
       }
     },
 
+    updateTask(projectId, updatedTask) {
+      const project = this.getProjectById(projectId);
+      if (project) {
+        const taskIndex = project.tasks.findIndex((task) => task.id === updatedTask.id);
+        if (taskIndex !== -1) {
+          project.tasks[taskIndex] = { ...project.tasks[taskIndex], ...updatedTask };
+          this.saveProjects();
+        }
+      }
+    },
+
     // Modifier l'utilisateur assigné à une tâche
     updateTaskDeveloper(projectId, taskId, newDeveloperId) {
       const project = this.getProjectById(projectId);
