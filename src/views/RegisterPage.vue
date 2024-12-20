@@ -1,4 +1,3 @@
-<!-- src\views\RegisterPage.vue -->
 <template>
   <div class="container mt-5">
     <div class="card mx-auto" style="max-width: 400px;">
@@ -35,6 +34,15 @@
               Développeur
             </label>
           </div>
+          <!-- Ajout du champ de dépôt d'image -->
+          <div class="mb-3">
+            <label for="profilePicture" class="form-label">Photo de profil (optionnel)</label>
+            <input type="file" id="profilePicture" @change="onFileChange" class="form-control" />
+          </div>
+          <!-- Affichage de l'aperçu de l'image -->
+          <div v-if="preview" class="mb-3 text-center">
+            <img :src="preview" alt="Aperçu de la photo" class="img-thumbnail" style="max-width: 150px;" />
+          </div>
           <button type="submit" class="btn btn-primary w-100">S'inscrire</button>
         </form>
         <p v-if="message" :class="success ? 'text-success mt-2' : 'text-danger mt-2'">
@@ -61,6 +69,20 @@ const password = ref('');
 const roles = ref({ manager: false, developer: false });
 const message = ref('');
 const success = ref(false);
+const profilePicture = ref(null);
+const preview = ref(null);
+
+function onFileChange(event) {
+  const file = event.target.files[0];
+  if (file) {
+    profilePicture.value = file;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      preview.value = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+}
 
 async function register() {
   const selectedRoles = [];
@@ -73,8 +95,14 @@ async function register() {
     return;
   }
 
-  // Appel de l'action "register" avec hashage géré dans le store
-  const result = await authStore.register(username.value, password.value, selectedRoles);
+  const newUser = {
+    username: username.value,
+    password: password.value,
+    roles: selectedRoles,
+    profilePicture: preview.value,
+  };
+
+  const result = await authStore.register(newUser);
   if (result.success) {
     success.value = true;
     message.value = result.message;
