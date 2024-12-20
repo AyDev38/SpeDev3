@@ -17,18 +17,26 @@ export const useAuthStore = defineStore('authStore', {
       return this.users.find((user) => user.id === userId);
     },
 
-    async register(username, password, roles) {
-      const existingUser = this.users.find((u) => u.username === username);
+    async register(user) {
+      const existingUser = this.users.find((u) => u.username === user.username);
       if (existingUser) return { success: false, message: "Nom d'utilisateur déjà pris." };
-
+    
       // Hasher le mot de passe
-      const hashedPassword = await bcrypt.hash(password, 10);
-
-      const newUser = { id: Date.now(), username, password: hashedPassword, roles };
+      const hashedPassword = await bcrypt.hash(user.password, 10);
+    
+      const newUser = {
+        id: Date.now(),
+        username: user.username,
+        password: hashedPassword,
+        roles: user.roles,
+        profilePicture: user.profilePicture || null, // Image optionnelle
+      };
+    
       this.users.push(newUser);
-      localStorage.setItem('users', JSON.stringify(this.users));
+      this.saveUsers();
       return { success: true, message: 'Inscription réussie !' };
     },
+    
 
     async authenticate(username, password) {
       const user = this.users.find((u) => u.username === username);

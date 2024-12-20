@@ -1,4 +1,3 @@
-<!-- src\components\Shared\Navbar.vue -->
 <template>
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
@@ -17,6 +16,15 @@
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
           <li v-if="authStore.currentUser" class="nav-item d-flex align-items-center">
+            <!-- Afficher la photo de profil -->
+            <div v-if="profilePicture" class="me-2">
+              <img
+                :src="profilePicture"
+                alt="Photo de profil"
+                class="rounded-circle"
+                style="width: 40px; height: 40px; object-fit: cover;"
+              />
+            </div>
             <span class="text-light me-2">{{ username }}</span>
             <button
               @click="logout"
@@ -35,8 +43,6 @@
   </nav>
 </template>
 
-
-
 <script setup>
 import { computed } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
@@ -48,9 +54,11 @@ const router = useRouter();
 // Propriété calculée pour obtenir le nom d'utilisateur
 const username = computed(() => authStore.currentUser?.username || 'Utilisateur');
 
+// Propriété calculée pour la photo de profil
+const profilePicture = computed(() => authStore.currentUser?.profilePicture || null);
+
 function logout() {
   authStore.logout();
   router.push('/');
 }
 </script>
-
