@@ -99,19 +99,23 @@
                 'not-draggable': task.validated,
               }"
               :draggable="false"
+              @dragover.prevent="onDragOverTask(index)"
+              @drop.prevent="onDropTask(index, status)"
             >
-            <div
-              class="card-header drag-handle"
-              :class="{ 'not-allowed': task.validated }"
-              :draggable="!task.validated"
-              @dragstart="!task.validated && onDragStart(task.id, status)"
-            ></div>
+              <div
+                class="card-header drag-handle"
+                :class="{ 'not-allowed': task.validated }"
+                :draggable="!task.validated"
+                @dragstart="!task.validated && onDragStart(task.id, status)"
+              ></div>
               <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="card-title m-0">{{ task.name }}</h5>
-                    <span v-if="task.validated" class="badge bg-success ms-2">Validée</span>
-                  </div>
-                 
+                  <h5 class="card-title m-0">{{ task.name }}</h5>
+                  <span v-if="task.validated" class="badge bg-success ms-2"
+                    >Validée</span
+                  >
+                </div>
+
                 <p class="card-text">
                   Assigné à :
                   <span v-if="isManager">
@@ -311,8 +315,8 @@ function onDropColumn(status) {
   isDraggingOver.value = null;
 }
 
-function onDragOverTask(index) {
-  // Gestion visuelle additionnelle si nécessaire
+function onDragStartTask(taskId) {
+  draggedTaskId.value = taskId;
 }
 
 function onDropTask(index, status) {
@@ -434,7 +438,6 @@ function formatDate(timestamp) {
 </script>
 
 <style scoped>
-
 .drag-handle {
   height: 20px;
   background-color: #6c757d; /* Gris */
@@ -452,6 +455,4 @@ function formatDate(timestamp) {
   cursor: not-allowed; /* Curseur interdit si validé */
   opacity: 0.5; /* Rend la barre visuellement désactivée */
 }
-
-
 </style>
