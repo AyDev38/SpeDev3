@@ -98,19 +98,20 @@
                 'draggable-task': !task.validated,
                 'not-draggable': task.validated,
               }"
+              :draggable="false"
+            >
+            <div
+              class="card-header drag-handle"
+              :class="{ 'not-allowed': task.validated }"
               :draggable="!task.validated"
               @dragstart="!task.validated && onDragStart(task.id, status)"
-              @dragover.prevent="!task.validated && onDragOverTask(index)"
-              @drop="!task.validated && onDropTask(index, status)"
-            >
+            ></div>
               <div class="card-body">
-                <h5 class="card-title m-0">{{ task.name }}</h5>
-                <div
-                  v-if="task.validated"
-                  class="badge bg-success d-flex align-items-center"
-                >
-                  <i class="bi bi-check-circle me-2"></i> Validée
-                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="card-title m-0">{{ task.name }}</h5>
+                    <span v-if="task.validated" class="badge bg-success ms-2">Validée</span>
+                  </div>
+                 
                 <p class="card-text">
                   Assigné à :
                   <span v-if="isManager">
@@ -433,16 +434,24 @@ function formatDate(timestamp) {
 </script>
 
 <style scoped>
-.draggable-task {
+
+.drag-handle {
+  height: 20px;
+  background-color: #6c757d; /* Gris */
   cursor: grab;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  user-select: none; /* Désactive la sélection du texte */
 }
 
-.draggable-task:active {
+.drag-handle:active {
   cursor: grabbing;
 }
 
-.not-draggable {
-  cursor: not-allowed;
-  opacity: 0.5;
+.drag-handle.not-allowed {
+  cursor: not-allowed; /* Curseur interdit si validé */
+  opacity: 0.5; /* Rend la barre visuellement désactivée */
 }
+
+
 </style>
