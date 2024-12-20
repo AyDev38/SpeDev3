@@ -131,7 +131,7 @@
                   </span>
                   <span v-else>{{ getUserLogin(task.assignedTo) }}</span>
                 </p>
-                <div class="d-flex justify-content-between mb-2">
+                <div class="">
                   <div
                     v-if="isManager"
                     class="d-flex justify-content-between mb-2"
@@ -143,11 +143,7 @@
                     >
                       Modifier Nom
                     </button>
-                  </div>
-                  <div
-                    v-if="isManager"
-                    class="d-flex justify-content-between mb-2"
-                  >
+
                     <button
                       v-if="task.status === 'Terminée' && !task.validated"
                       @click="validateTask(task)"
@@ -162,8 +158,8 @@
                     >
                       Dévalider
                     </button>
-                  </div>
-                  <button
+
+                    <button
                     v-if="isManager"
                     @click="deleteTask(task.id)"
                     class="btn btn-danger btn-sm"
@@ -171,6 +167,9 @@
                   >
                     Supprimer
                   </button>
+
+                  </div>
+                  
                 </div>
                 <button
                   @click="toggleComments(task.id)"
