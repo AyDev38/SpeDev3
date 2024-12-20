@@ -105,16 +105,6 @@
             >
               <div class="card-body">
                 <h5 class="card-title m-0">{{ task.name }}</h5>
-
-                <!-- Bouton de copie -->
-                <button
-                  class="btn btn-outline-secondary btn-sm"
-                  @click="copyToClipboard(task.name)"
-                  title="Copier le titre"
-                  :disabled="task.validated"
-                >
-                  <i class="bi bi-clipboard"></i>
-                </button>
                 <div
                   v-if="task.validated"
                   class="badge bg-success d-flex align-items-center"
@@ -296,17 +286,6 @@ const getTasksByStatus = (status) => {
       .filter((task) => task.status === status)
       .sort((a, b) => a.order - b.order) || []
   );
-};
-
-const copyToClipboard = (text) => {
-  navigator.clipboard
-    .writeText(text)
-    .then(() => {
-      alert("Texte copié dans le presse-papier !");
-    })
-    .catch(() => {
-      alert("Échec de la copie. Veuillez réessayer.");
-    });
 };
 
 function onDragStart(taskId, status) {
