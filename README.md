@@ -1,14 +1,20 @@
-# projetVueJS
+# Projet VueJS - Gestion de Projet
 
-This template should help get you started developing with Vue 3 in Vite.
+Ce projet est une application de gestion de projet développée avec Vue.js 3 et Vite. Il permet de gérer des projets, de créer des tâches, d'assigner des utilisateurs, et de suivre l'avancement des tâches via un tableau Kanban.
+
+## Développeurs
+
+- Matthieu Fanget
+- Pierre Boscus
+- Aymeric Surre
 
 ## Recommended IDE Setup
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (et désactiver Vetur).
 
 ## Customize configuration
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+Voir la [documentation de configuration de Vite](https://vite.dev/config/).
 
 ## Project Setup
 
