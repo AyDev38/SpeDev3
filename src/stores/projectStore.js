@@ -108,7 +108,7 @@ export const useProjectStore = defineStore('projectStore', {
           id: Date.now(),
           name: taskName,
           assignedTo: developerId,
-          status: 'À valider',
+          status: 'À faire',
           order: project.tasks.length,
           comments: [],
           validated: false,
