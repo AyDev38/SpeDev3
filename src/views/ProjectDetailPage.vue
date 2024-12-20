@@ -6,7 +6,8 @@
       <h1>{{ project.name }}</h1>
       <!-- Info sur les dates du projets -->
       <p class="text-muted">
-        Créé le : {{ formatDate(project.createdat) }} | Date de fin : {{ formatDate(project.deadline) }}
+        Créé le : {{ formatDate(project.createdat) }} | Date de fin :
+        {{ formatDate(project.deadline) }}
       </p>
     </header>
 
@@ -43,7 +44,7 @@
     </div>
 
     <!-- Création de Tâches -->
-    <div v-if="isManager && isAssigned || !isManager" class="card mb-4">
+    <div v-if="(isManager && isAssigned) || !isManager" class="card mb-4">
       <div class="card-body">
         <h3 class="card-title">Créer une tâche</h3>
         <form @submit.prevent="createTask" class="row g-3">
@@ -74,7 +75,6 @@
         </form>
       </div>
     </div>
-
     <!-- Kanban Board -->
     <div class="row">
       <div
@@ -94,15 +94,31 @@
               v-for="(task, index) in getTasksByStatus(status)"
               :key="task.id"
               class="card mb-3"
-              :class="{ 'draggable-task': !task.validated, 'not-draggable': task.validated }"
+              :class="{
+                'draggable-task': !task.validated,
+                'not-draggable': task.validated,
+              }"
               :draggable="!task.validated"
               @dragstart="!task.validated && onDragStart(task.id, status)"
               @dragover.prevent="!task.validated && onDragOverTask(index)"
               @drop="!task.validated && onDropTask(index, status)"
             >
               <div class="card-body">
-                <h5 class="card-title">{{ task.name }}</h5>
-                <div v-if="task.validated" class="badge bg-success d-flex align-items-center">
+                <h5 class="card-title m-0">{{ task.name }}</h5>
+
+                <!-- Bouton de copie -->
+                <button
+                  class="btn btn-outline-secondary btn-sm"
+                  @click="copyToClipboard(task.name)"
+                  title="Copier le titre"
+                  :disabled="task.validated"
+                >
+                  <i class="bi bi-clipboard"></i>
+                </button>
+                <div
+                  v-if="task.validated"
+                  class="badge bg-success d-flex align-items-center"
+                >
                   <i class="bi bi-check-circle me-2"></i> Validée
                 </div>
                 <p class="card-text">
@@ -157,7 +173,8 @@
                       Dévalider
                     </button>
                   </div>
-                  <button v-if="isManager"
+                  <button
+                    v-if="isManager"
                     @click="deleteTask(task.id)"
                     class="btn btn-danger btn-sm"
                     :disabled="task.validated"
@@ -176,7 +193,11 @@
               <!-- Section des commentaires -->
               <div v-if="openComments[task.id]" class="mt-3">
                 <div class="list-group">
-                  <div v-for="comment in task.comments" :key="comment.id" class="list-group-item">
+                  <div
+                    v-for="comment in task.comments"
+                    :key="comment.id"
+                    class="list-group-item"
+                  >
                     <div class="d-flex justify-content-between">
                       <strong>{{ getUserLogin(comment.text.authorId) }}</strong>
                       <small class="text-muted">{{
@@ -255,14 +276,18 @@ const isAssigned = computed(() =>
 
 onMounted(() => {
   const projectId = Number(route.params.id);
-  project.value = projectStore.getProjectByIdSecure(projectId, userId.value, isManager.value);
+  project.value = projectStore.getProjectByIdSecure(
+    projectId,
+    userId.value,
+    isManager.value
+  );
   if (!project.value) {
     // Redirection vers la page 404 si aucun projet n'est trouvé
-    router.push({ name: 'NotFound' });
+    router.push({ name: "NotFound" });
   } else {
     developers.value = authStore.getDevelopers();
   }
-  console.log("PROJECT.VALUE", project.value)
+  console.log("PROJECT.VALUE", project.value);
 });
 
 const getTasksByStatus = (status) => {
@@ -271,6 +296,17 @@ const getTasksByStatus = (status) => {
       .filter((task) => task.status === status)
       .sort((a, b) => a.order - b.order) || []
   );
+};
+
+const copyToClipboard = (text) => {
+  navigator.clipboard
+    .writeText(text)
+    .then(() => {
+      alert("Texte copié dans le presse-papier !");
+    })
+    .catch(() => {
+      alert("Échec de la copie. Veuillez réessayer.");
+    });
 };
 
 function onDragStart(taskId, status) {
@@ -343,12 +379,12 @@ function updateTaskDeveloper(taskId, developerId) {
 }
 
 function editTaskName(taskId) {
-    const newName = prompt("Nouveau nom de la tâche :");
-    if (newName) {
-      projectStore.updateTaskName(project.value.id, taskId, newName);
-      reloadProject();
-    }
+  const newName = prompt("Nouveau nom de la tâche :");
+  if (newName) {
+    projectStore.updateTaskName(project.value.id, taskId, newName);
+    reloadProject();
   }
+}
 
 function reloadProject() {
   project.value = projectStore.getProjectById(project.value.id);
@@ -415,14 +451,12 @@ function unvalidateTask(task) {
 
 function formatDate(timestamp) {
   if (!timestamp) return "Non spécifiée";
-  const options = { year: 'numeric', month: 'long', day: 'numeric' };
+  const options = { year: "numeric", month: "long", day: "numeric" };
   return new Date(timestamp).toLocaleDateString("fr-FR", options);
 }
 </script>
 
-
 <style scoped>
-
 .draggable-task {
   cursor: grab;
 }
@@ -435,6 +469,4 @@ function formatDate(timestamp) {
   cursor: not-allowed;
   opacity: 0.5;
 }
-
-
 </style>
